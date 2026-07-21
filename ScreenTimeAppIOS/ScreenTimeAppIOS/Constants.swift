@@ -5,9 +5,16 @@
 //  Created by Albert Castillo on 7/16/26.
 //
 
-import Foundation
+import SwiftUI
 
 struct Constants{
+    static let backgroundColor = Color("Background")
+    static let backgroundSecondaryColor = Color("BackgroundSecondary")
+    static let primaryTextColor = Color("PrimaryText")
+    static let secondaryTextColor = Color("SecondaryText")
+    static let buttonBackColor = Color("ButtonBackground")
+    static let buttonForeColor = Color("ButtonForeground")
+
     static let homeString = "Home"
     static let friendsString = "Friends"
     static let leaderboardString = "Leaderboard"

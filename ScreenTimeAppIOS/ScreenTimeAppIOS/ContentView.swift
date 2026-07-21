@@ -12,15 +12,24 @@ struct ContentView: View {
         
         TabView {
             Tab(Constants.homeString, systemImage: Constants.homeIconString){
-               HomeView()
+                NavigationStack {
+                    HomeView()
+                }
             }
             Tab(Constants.friendsString, systemImage: Constants.friendsIconString){
-                Text(Constants.friendsString)
+                NavigationStack{
+                    FriendsView()
+                }
             }
             Tab(Constants.leaderboardString, systemImage: Constants.leaderboardIconString){
-                Text(Constants.leaderboardString)
+                NavigationStack{
+                    LeaderboardView()
+                }
             }
         }
+        .tint(Constants.primaryTextColor)
+        .toolbarBackground(.visible, for: .tabBar)
+        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
     }
 }
 
