@@ -9,12 +9,18 @@ import SwiftUI
 
 struct SignupFinishView: View {
     
+    @Environment(AuthManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("email") private var email = ""
+    
+    @State private var email: String
     @State private var username = ""
     @State private var password = ""
     @State private var confirmedPassword = ""
     @State private var passwordsMatch = false
+    
+    init(email: String) {
+        _email = State(initialValue: email)
+    }
     
     var body: some View {
         ZStack {
@@ -76,9 +82,8 @@ struct SignupFinishView: View {
                     passwordsMatch = newValue == password
                 }
             
-            
                 Button{
-                    print("Sign Up")
+                    signUp()
                 } label: {
                     Text("Sign Up")
                         .frame(width: 360, height: 48)
@@ -105,6 +110,15 @@ struct SignupFinishView: View {
     }
 }
 
+private extension SignupFinishView{
+    func signUp(){
+        Task {
+            await authManager.signUp(withEmail: email, password: password)
+        }
+    }
+}
+
 #Preview {
-    SignupFinishView()
+    SignupFinishView(email: "albert@example.com")
+        .environment(AuthManager(service: SupabaseAuthService()))
 }

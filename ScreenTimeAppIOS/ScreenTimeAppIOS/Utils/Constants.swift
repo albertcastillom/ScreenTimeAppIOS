@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct Constants{
+    
+    static let projectURLString = "https://mbcebxzjsodtcntixcii.supabase.co"
+    static let projectAPIKey = "sb_publishable_re-oMhv9pfQpA3VcUadCFw_9QyBpCsP"
+    
     static let backgroundColor = Color("Background")
     static let backgroundSecondaryColor = Color("BackgroundSecondary")
     static let primaryTextColor = Color("PrimaryText")

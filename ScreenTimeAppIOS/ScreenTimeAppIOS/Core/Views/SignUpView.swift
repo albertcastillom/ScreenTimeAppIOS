@@ -1,5 +1,5 @@
 //
-//  LoginView.swift
+//  SignUpView.swift
 //  ScreenTimeAppIOS
 //
 //  Created by Albert Castillo on 7/21/26.
@@ -7,41 +7,37 @@
 
 import SwiftUI
 
-struct LoginView: View {
+struct SignUpView: View {
     
     @Environment(\.dismiss) private var dismiss
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @State private var email = ""
     
     var body: some View {
         ZStack {
             Color("Background").ignoresSafeArea()
-        
+            
             VStack {
                 
                 Spacer()
                 
-                Text("Login In")
+                Text("Create an Account")
                     .font(.title)
                     .fontWeight(.bold)
-                TextField("Email Address", text: .constant(""))
+                Text("Please enter your email address to continue")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
-                
-                SecureField("Enter your password", text: $password)
-                    .font(.subheadline)
-                    .padding(12)
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(10)
-                    .padding(.horizontal, 24)
-                
-                Button{
-                        print("logged in")
+            
+                NavigationLink{
+                    SignupFinishView(email: email)
+                        .navigationBarBackButtonHidden()
                 } label: {
-                    Text("Login")
+                    Text("Continue")
                         .frame(width: 360, height: 48)
                         .font(.headline)
                         .background(.buttonBackground)
@@ -52,22 +48,31 @@ struct LoginView: View {
                 
                 Spacer()
                 
-                Button { dismiss() } label: {
+                NavigationLink{
+                    LoginView()
+                        .navigationBarBackButtonHidden()
+                } label: {
                     HStack(spacing: 3){
-                        Text("Dont have an account?")
+                        Text("Already have an account?")
                             .foregroundStyle(Constants.secondaryTextColor)
-                        Text("Sign Up")
+                        
+                        Text("Login")
                             .fontWeight(.semibold)
                             .foregroundStyle(Constants.secondaryTextColor)
-                        }
+                    }
                 }
+                
             }
+        }
+        .onAppear {
+            UserDefaults.standard.removeObject(forKey: "email")
         }
     }
 }
 
 #Preview {
     NavigationStack {
-        LoginView()
+        SignUpView()
     }
+    .environment(AuthManager(service: SupabaseAuthService()))
 }
