@@ -64,9 +64,6 @@ struct SignUpView: View {
                 
             }
         }
-        .onAppear {
-            UserDefaults.standard.removeObject(forKey: "email")
-        }
     }
 }
 

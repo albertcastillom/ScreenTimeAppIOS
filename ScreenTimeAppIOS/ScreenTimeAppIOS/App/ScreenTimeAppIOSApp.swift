@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct ScreenTimeAppIOSApp: App {
+    
+    @State private var authManager = AuthManager(service: SupabaseAuthService())
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(authManager)
         }
     }
 }

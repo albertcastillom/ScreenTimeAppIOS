@@ -113,7 +113,7 @@ struct SignupFinishView: View {
 private extension SignupFinishView{
     func signUp(){
         Task {
-            await authManager.signUp(withEmail: email, password: password)
+            await authManager.signUp(withEmail: email, password: password, username: username)
         }
     }
 }

@@ -41,3 +41,4 @@ build/
 
 # Environment variables
 .env
+AppConstants.swift

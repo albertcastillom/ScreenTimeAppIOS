@@ -15,7 +15,13 @@ struct ContentView: View {
         Group {
             switch authManager.authState {
             case .notDetermined:
-                ProgressView()
+                VStack {
+                    Text("ScreenTime App")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    ProgressView()
+                }
             case .notAuthenticated:
                 NavigationStack {
                     SignUpView()

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     
+    @Environment(AuthManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
     @State private var email: String = ""
     @State private var password: String = ""
@@ -24,7 +25,7 @@ struct LoginView: View {
                 Text("Login In")
                     .font(.title)
                     .fontWeight(.bold)
-                TextField("Email Address", text: .constant(""))
+                TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
                     .background(Color(.secondarySystemBackground))
@@ -39,7 +40,7 @@ struct LoginView: View {
                     .padding(.horizontal, 24)
                 
                 Button{
-                        print("logged in")
+                        login()
                 } label: {
                     Text("Login")
                         .frame(width: 360, height: 48)
@@ -66,8 +67,17 @@ struct LoginView: View {
     }
 }
 
+private extension LoginView{
+    func login(){
+        Task {
+            await authManager.login(withEmail: email, password: password)
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
         LoginView()
+            .environment(AuthManager(service: SupabaseAuthService()))
     }
 }
