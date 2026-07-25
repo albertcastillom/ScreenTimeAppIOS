@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import FamilyControls
 
 struct ContentView: View {
     
     @Environment(AuthManager.self) private var authManager
+    @StateObject var ScreenTimeManager = AuthorizationManager()
     
     var body: some View {
         Group {
@@ -27,26 +29,44 @@ struct ContentView: View {
                     SignUpView()
                 }
             case .authenticated:
-                TabView {
-                    Tab(Constants.homeString, systemImage: Constants.homeIconString){
-                        NavigationStack {
-                            HomeView()
+                VStack{
+                    if ScreenTimeManager.authorizationStatus == .notDetermined {
+                        Button("Request Authorization") {
+                            Task {
+                                await ScreenTimeManager.requestAuthorization()
+                            }
                         }
-                    }
-                    Tab(Constants.friendsString, systemImage: Constants.friendsIconString){
-                        NavigationStack{
-                            FriendsView()
+                    } else if ScreenTimeManager.authorizationStatus == .approved {
+                        TabView {
+                            Tab(Constants.homeString, systemImage: Constants.homeIconString){
+                                NavigationStack {
+                                    HomeView()
+                                }
+                            }
+                            Tab(Constants.friendsString, systemImage: Constants.friendsIconString){
+                                NavigationStack{
+                                    FriendsView()
+                                }
+                            }
+                            Tab(Constants.leaderboardString, systemImage: Constants.leaderboardIconString){
+                                NavigationStack{
+                                    LeaderboardView()
+                                }
+                            }
                         }
-                    }
-                    Tab(Constants.leaderboardString, systemImage: Constants.leaderboardIconString){
-                        NavigationStack{
-                            LeaderboardView()
-                        }
+                        .tint(Constants.primaryTextColor)
+                        .toolbarBackground(.visible, for: .tabBar)
+                        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+                    } else {
+                        Text("Authorization Denied or Restricted. Please enable in Settings.")
+                        // Guide user to Settings if needed
                     }
                 }
-                .tint(Constants.primaryTextColor)
-                .toolbarBackground(.visible, for: .tabBar)
-                .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+                .onAppear {
+                    Task {
+                        await ScreenTimeManager.checkAuthorization()
+                    }
+                }
             }
         }
         .task {
