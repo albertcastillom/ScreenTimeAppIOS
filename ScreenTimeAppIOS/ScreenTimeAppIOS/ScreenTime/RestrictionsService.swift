@@ -26,9 +26,6 @@ class RestrictionsService {
         store.shield.applications = applicationTokens.isEmpty ? nil : applicationTokens
         store.shield.applicationCategories = categoryTokens.isEmpty ? nil : .specific(categoryTokens)
         store.shield.webDomains = webTokens.isEmpty ? nil : webTokens
-        
-      
-       
     }
     
     func removeRestrictions(){
@@ -37,43 +34,67 @@ class RestrictionsService {
         store.shield.applications = nil
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil
-     
-       
     }
     
     // Define a unique name for your activity
-       static let activityName = DeviceActivityName("com.screentime.screentimeapp.blockerActivity")
+static let activityName = DeviceActivityName("focus Session")
       
-       func startMonitoringSchedule() {
-           // Define a schedule. This example is 24/7, repeating daily.
-           let schedule = DeviceActivitySchedule(
-               intervalStart: DateComponents(hour: 17, minute: 0),
-               intervalEnd: DateComponents(hour: 18, minute: 0),
-               repeats: true,
-               warningTime: nil // No warning needed for simple blocking
-           )
+    @discardableResult
+    func startMonitoringSchedule(durationInMinutes: Int) -> Bool {
+        // Apple's DeviceActivity schedules require at least a 15-minute interval.
+        guard durationInMinutes >= 15 else {
+            print("Error: The minimum schedule interval allowed by Apple is 15 minutes.")
+            return false
+        }
           
-           do {
-               // Start monitoring. This tells the system to check the 'store'
-               // associated with this activity during the 'schedule'.
-               try center.startMonitoring(Self.activityName, during: schedule)
-           } catch {
-               print("Error starting DeviceActivity monitoring: \(error)")
-           }
-       }
+        let calendar = Calendar.current
+        let startDate = Date()
+          
+        guard let endDate = calendar.date(byAdding: .minute, value: durationInMinutes, to: startDate) else {
+            return false
+        }
+          
+        let components: Set<Calendar.Component> = [.year, .month, .day, .hour, .minute, .second]
+        let intervalStart = calendar.dateComponents(components, from: startDate)
+        let intervalEnd = calendar.dateComponents(components, from: endDate)
+        
+        let schedule = DeviceActivitySchedule(
+            intervalStart: intervalStart,
+            intervalEnd: intervalEnd,
+            repeats: false,
+            warningTime: nil
+        )
+          
+        do {
+            try center.startMonitoring(Self.activityName, during: schedule)
+            return true
+        } catch {
+            print("Error starting DeviceActivity monitoring: \(error)")
+            return false
+        }
+    }
+    
        func stopMonitoring() {
            // Stop monitoring for all activities or specify names
            center.stopMonitoring([Self.activityName])
-          
        }
-       // Combined Activation Logic (Similar to provided code)
-       func activateRestrictions(selection: FamilyActivitySelection) {
-           applyRestrictions(selection: selection) // Step 2: Define rules
-          // startMonitoringSchedule()             // Step 3: Activate schedule
-       }
-       // Combined Deactivation Logic
-       func deactivateRestrictions() {
-           removeRestrictions() // Step 2: Clear rules
-          // stopMonitoring()     // Step 3: Deactivate schedule
-       }
+    
+    // Combined Activation Logic (Similar to provided code)
+    @discardableResult
+    func activateRestrictions(selection: FamilyActivitySelection, minutes: Int) -> Bool {
+        applyRestrictions(selection: selection)
+
+        guard startMonitoringSchedule(durationInMinutes: minutes) else {
+            removeRestrictions()
+            return false
+        }
+
+        return true
+    }
+    
+    // Combined Deactivation Logic
+    func deactivateRestrictions() {
+        removeRestrictions()
+        stopMonitoring()
+    }
 }

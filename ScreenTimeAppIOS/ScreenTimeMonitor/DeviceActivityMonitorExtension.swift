@@ -6,10 +6,23 @@
 //
 
 import DeviceActivity
+import Foundation
+import ManagedSettings
 
 // Optionally override any of the functions below.
 // Make sure that your class name matches the NSExtensionPrincipalClass in your Info.plist.
 class DeviceActivityMonitorExtension: DeviceActivityMonitor {
+    private enum SharedState {
+        static let appGroupIdentifier = "group.com.albertcastillo.ScreenTimeAppIOS"
+        static let isBlockingKey = "isBlocking"
+        static let sessionEndDateKey = "sessionEndDate"
+    }
+    
+    private let store = ManagedSettingsStore(
+        named: ManagedSettingsStore.Name("ScreenTimeAppIOS")
+    )
+    private let sharedDefaults = UserDefaults(suiteName: SharedState.appGroupIdentifier)
+   
     override func intervalDidStart(for activity: DeviceActivityName) {
         super.intervalDidStart(for: activity)
         
@@ -20,6 +33,17 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         super.intervalDidEnd(for: activity)
         
         // Handle the end of the interval.
+        
+        guard activity == DeviceActivityName("focus Session") else {
+            return
+        }
+
+        store.shield.applications = nil
+        store.shield.applicationCategories = nil
+        store.shield.webDomains = nil
+
+        sharedDefaults?.set(false, forKey: SharedState.isBlockingKey)
+        sharedDefaults?.removeObject(forKey: SharedState.sessionEndDateKey)
     }
     
     override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name, activity: DeviceActivityName) {
