@@ -10,17 +10,19 @@ import FamilyControls
 
 struct ScreenTimePermissionView: View {
     
-    @StateObject var ScreenTimeManager = AuthorizationManager()
+    @StateObject var ScreenTimeManager = PermissionManager()
     
     var body: some View {
         ZStack {
             Color("Background")
                 .ignoresSafeArea()
             
-            Text("This App needs Screen Time Permissions")
-            Button("Request Permissions") {
-                Task {
-                    await ScreenTimeManager.requestAuthorization()
+            VStack{
+                Text("This App needs Screen Time Permissions")
+                Button("Request Permissions") {
+                    Task {
+                        await ScreenTimeManager.requestAuthorization()
+                    }
                 }
             }
         }
