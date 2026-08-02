@@ -11,34 +11,25 @@ import FamilyControls
 import DeviceActivity
 
 class RestrictionsService {
+    private let store = ManagedSettingsStore(named: ScreenTimeIdentifiers.managedSettingsStoreName)
+    private let center = DeviceActivityCenter()
     
-    let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("ScreenTimeAppIOS"))
-    let center = DeviceActivityCenter()
-    
-    func applyRestrictions(selection: FamilyActivitySelection){
-        
-        //extract tokens from selection
+    func applyRestrictions(selection: FamilyActivitySelection) {
         let applicationTokens = selection.applicationTokens
         let categoryTokens = selection.categoryTokens
         let webTokens = selection.webDomainTokens
         
-        //apply tokens to shield
         store.shield.applications = applicationTokens.isEmpty ? nil : applicationTokens
         store.shield.applicationCategories = categoryTokens.isEmpty ? nil : .specific(categoryTokens)
         store.shield.webDomains = webTokens.isEmpty ? nil : webTokens
     }
     
-    func removeRestrictions(){
-       
-        // Clear the shield configuration
+    func removeRestrictions() {
         store.shield.applications = nil
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil
     }
     
-    // Define a unique name for your activity
-static let activityName = DeviceActivityName("focus Session")
-      
     @discardableResult
     func startMonitoringSchedule(durationInMinutes: Int) -> Bool {
         // Apple's DeviceActivity schedules require at least a 15-minute interval.
@@ -66,7 +57,7 @@ static let activityName = DeviceActivityName("focus Session")
         )
           
         do {
-            try center.startMonitoring(Self.activityName, during: schedule)
+            try center.startMonitoring(ScreenTimeIdentifiers.deviceActivityName, during: schedule)
             return true
         } catch {
             print("Error starting DeviceActivity monitoring: \(error)")
@@ -74,12 +65,10 @@ static let activityName = DeviceActivityName("focus Session")
         }
     }
     
-       func stopMonitoring() {
-           // Stop monitoring for all activities or specify names
-           center.stopMonitoring([Self.activityName])
-       }
+    func stopMonitoring() {
+        center.stopMonitoring([ScreenTimeIdentifiers.deviceActivityName])
+    }
     
-    // Combined Activation Logic (Similar to provided code)
     @discardableResult
     func activateRestrictions(selection: FamilyActivitySelection, minutes: Int) -> Bool {
         applyRestrictions(selection: selection)
@@ -92,7 +81,6 @@ static let activityName = DeviceActivityName("focus Session")
         return true
     }
     
-    // Combined Deactivation Logic
     func deactivateRestrictions() {
         removeRestrictions()
         stopMonitoring()

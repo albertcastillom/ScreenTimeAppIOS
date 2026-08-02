@@ -12,16 +12,9 @@ import FamilyControls
 @Observable
 @MainActor
 final class AppBlockingModel {
-    private enum SharedState {
-        static let appGroupIdentifier = "group.com.albertcastillo.ScreenTimeAppIOS"
-        static let isBlockingKey = "isBlocking"
-        static let sessionEndDateKey = "sessionEndDate"
-        static let activitySelectionKey = "activitySelection"
-    }
-
     var activitySelection = FamilyActivitySelection() {
         didSet {
-            saveActivitySelection()
+            stateStore.saveActivitySelection(activitySelection)
         }
     }
     var isPickerPresented = false
@@ -30,11 +23,20 @@ final class AppBlockingModel {
     var selectedFriend: String?
     var sessionEndDate: Date?
 
-    @ObservationIgnored private let restrictionsService = RestrictionsService()
-    @ObservationIgnored private let sharedDefaults = UserDefaults(suiteName: SharedState.appGroupIdentifier)
+    @ObservationIgnored private let restrictionsService: RestrictionsService
+    @ObservationIgnored private let stateStore: BlockingStateStore
 
     init() {
-        loadActivitySelection()
+        self.restrictionsService = RestrictionsService()
+        self.stateStore = BlockingStateStore()
+        activitySelection = stateStore.loadActivitySelection()
+        refreshBlockingState()
+    }
+
+    init(restrictionsService: RestrictionsService, stateStore: BlockingStateStore) {
+        self.restrictionsService = restrictionsService
+        self.stateStore = stateStore
+        activitySelection = stateStore.loadActivitySelection()
         refreshBlockingState()
     }
 
@@ -88,58 +90,10 @@ final class AppBlockingModel {
     }
 
     func refreshBlockingState() {
-        guard let sharedDefaults else {
-            isBlocking = false
-            sessionEndDate = nil
-            return
-        }
-
-        let savedEndDate = sharedDefaults.object(forKey: SharedState.sessionEndDateKey) as? Date
-        let savedIsBlocking = sharedDefaults.bool(forKey: SharedState.isBlockingKey)
-
-        if let savedEndDate, savedEndDate <= Date() {
-            saveBlockingState(isBlocking: false, sessionEndDate: nil)
-        } else {
-            isBlocking = savedIsBlocking
-            sessionEndDate = savedEndDate
-        }
+        let blockingState = stateStore.loadBlockingState()
+        isBlocking = blockingState.isBlocking
+        sessionEndDate = blockingState.sessionEndDate
     }
-
-    private func saveBlockingState(isBlocking: Bool, sessionEndDate: Date?) {
-        self.isBlocking = isBlocking
-        self.sessionEndDate = sessionEndDate
-
-        sharedDefaults?.set(isBlocking, forKey: SharedState.isBlockingKey)
-
-        if let sessionEndDate {
-            sharedDefaults?.set(sessionEndDate, forKey: SharedState.sessionEndDateKey)
-        } else {
-            sharedDefaults?.removeObject(forKey: SharedState.sessionEndDateKey)
-        }
-    }
-
-    private func loadActivitySelection() {
-        guard let data = sharedDefaults?.data(forKey: SharedState.activitySelectionKey) else {
-            return
-        }
-
-        do {
-            activitySelection = try JSONDecoder().decode(FamilyActivitySelection.self, from: data)
-        } catch {
-            print("Failed to load saved activity selection: \(error)")
-            sharedDefaults?.removeObject(forKey: SharedState.activitySelectionKey)
-        }
-    }
-
-    private func saveActivitySelection() {
-        do {
-            let data = try JSONEncoder().encode(activitySelection)
-            sharedDefaults?.set(data, forKey: SharedState.activitySelectionKey)
-        } catch {
-            print("Failed to save activity selection: \(error)")
-        }
-    }
-    
 
     var blockedSelectionSummary: [String] {
         var summary: [String] = []
@@ -157,6 +111,12 @@ final class AppBlockingModel {
         }
 
         return summary
+    }
+
+    private func saveBlockingState(isBlocking: Bool, sessionEndDate: Date?) {
+        self.isBlocking = isBlocking
+        self.sessionEndDate = sessionEndDate
+        stateStore.saveBlockingState(isBlocking: isBlocking, sessionEndDate: sessionEndDate)
     }
 
     private var hasSelectedApps: Bool {
