@@ -11,7 +11,7 @@ import FamilyControls
 struct AppRootView: View {
     
     @Environment(AuthManager.self) private var authManager
-    @StateObject var ScreenTimeManager = PermissionManager()
+    @StateObject private var screenTimeManager = PermissionManager()
     
     var body: some View {
         Group {
@@ -25,9 +25,9 @@ struct AppRootView: View {
             case .authenticated:
                 //Displays home page
                 VStack{
-                    if ScreenTimeManager.authorizationStatus == .notDetermined {
-                        ScreenTimePermissionView()
-                    } else if ScreenTimeManager.authorizationStatus == .approved {
+                    if screenTimeManager.authorizationStatus == .notDetermined {
+                        ScreenTimePermissionView(screenTimeManager: screenTimeManager)
+                    } else if screenTimeManager.authorizationStatus == .approved {
                         MainTabView()
                     } else {
                         Text("Authorization Denied or Restricted. Please enable in Settings.")
@@ -35,9 +35,7 @@ struct AppRootView: View {
                     }
                 }
                 .onAppear {
-                    Task {
-                        await ScreenTimeManager.checkAuthorization()
-                    }
+                    screenTimeManager.checkAuthorization()
                 }
             }
         }

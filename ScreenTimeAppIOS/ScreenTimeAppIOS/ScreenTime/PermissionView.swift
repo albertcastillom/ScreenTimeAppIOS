@@ -9,8 +9,7 @@ import SwiftUI
 import FamilyControls
 
 struct ScreenTimePermissionView: View {
-    
-    @StateObject var ScreenTimeManager = PermissionManager()
+    @ObservedObject var screenTimeManager: PermissionManager
     
     var body: some View {
         ZStack {
@@ -21,7 +20,7 @@ struct ScreenTimePermissionView: View {
                 Text("This App needs Screen Time Permissions")
                 Button("Request Permissions") {
                     Task {
-                        await ScreenTimeManager.requestAuthorization()
+                        await screenTimeManager.requestAuthorization()
                     }
                 }
             }
@@ -30,5 +29,5 @@ struct ScreenTimePermissionView: View {
 }
 
 #Preview {
-    ScreenTimePermissionView()
+    ScreenTimePermissionView(screenTimeManager: PermissionManager())
 }

@@ -10,11 +10,8 @@ import FamilyControls
 
 struct HomeView: View {
     @Environment(AuthManager.self) private var authManager
-    @State private var appBlockingModel = AppBlockingModel()
-    
     var body: some View {
-        @Bindable var appBlockingModel = appBlockingModel
-
+   
         ZStack {
             Color("Background")
                 .ignoresSafeArea()
@@ -52,7 +49,7 @@ struct HomeView: View {
                         .lineLimit(3) // Keeps layout consistent
 
             
-                    NavigationLink(destination: SessionView(appBlockingModel: appBlockingModel)){
+                    NavigationLink(destination: SessionView()){
                         Image(systemName: "play.circle.fill")
                             .font(.title)
                             .foregroundStyle(Color("PrimaryText"))
@@ -77,22 +74,6 @@ struct HomeView: View {
                         .foregroundColor(.buttonForeground)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
-                
-                Button{
-                    appBlockingModel.presentAppPicker()
-                } label: {
-                    Text("Choose Apps to Block")
-                        .frame(width: 360, height: 48)
-                        .font(.headline)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                }
-                .familyActivityPicker(
-                    isPresented: $appBlockingModel.isPickerPresented,
-                    selection: $appBlockingModel.activitySelection
-                )
-                
                 
                 Spacer()
             }

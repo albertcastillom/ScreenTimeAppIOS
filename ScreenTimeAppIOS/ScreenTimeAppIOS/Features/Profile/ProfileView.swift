@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @State private var viewModel = ProfileViewModel()
+
     var body: some View {
         ZStack {
             Constants.backgroundColor.ignoresSafeArea(edges: .all)
@@ -24,60 +26,17 @@ struct ProfileView: View {
                 .padding(.horizontal)
                 .padding(.top)
                 
+                profileCard
                 
-                VStack(alignment: .leading, spacing: 12) {
-     
-                    HStack{
-                            Image(systemName: "person.crop.circle")
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                                .foregroundStyle(Constants.primaryTextColor)
-                        
-                    
-                            VStack(alignment: .leading, spacing: 4) {
-                            Text("John Doe")
-                                .font(.body)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Constants.secondaryTextColor)
-                            
-                            Text("johndoes@gmail.com")
-                                .font(.body)
-                                .foregroundStyle(Constants.secondaryTextColor)
-                                
-                            Text("Member since 2026")
-                                .font(.body)
-                                .foregroundStyle(Constants.secondaryTextColor)
-                            }
-                        Spacer()
-                            
-                        Button("Edit") {
-                            print("edit Profile")
-                        }
-                        .padding()
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
-                        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
-                        
-                    }
-                }
-                .padding(20) // Spacing inside the card
-                .frame(maxWidth: .infinity, alignment: .leading) // Fills available horizontal width
-                .background(Constants.backgroundSecondaryColor)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous)) // Smooth corners
-                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5) // Soft drop shadow
-                .padding(.horizontal)
-           
                 HStack(spacing: 12) {
                     statCard(value: "20", title: "Sessions")
                     statCard(value: "3d", title: "Streak")
-                    statCard(value: "5", title: "Friends")
+                    statCard(value: "\(viewModel.friendsCount)", title: "Friends")
                     statCard(value: "#4", title: "Rank")
                 }
                 .padding(.horizontal)
                 
-                
                 VStack(alignment: .leading, spacing: 12) {
-                    // Card Title
                     Text("Notifications")
                         .font(.title2)
                         .fontWeight(.bold)
@@ -95,12 +54,12 @@ struct ProfileView: View {
                             .toggleStyle(SwitchToggleStyle())
                     }
                 }
-                .padding(20) // Spacing inside the card
-                .frame(maxWidth: .infinity, alignment: .leading) // Fills available horizontal width
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color("BackgroundSecondary"))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous)) // Smooth corners
-                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5) // Soft drop shadow
-                .padding(.horizontal) // Spacing outside the card
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding(.horizontal)
                 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Privacy Policy")
@@ -113,18 +72,96 @@ struct ProfileView: View {
                         .font(.body)
                         .fontWeight(.semibold)
                 }
-                .padding(20) // Spacing inside the card
-                .frame(maxWidth: .infinity, alignment: .leading) // Fills available horizontal width
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color("BackgroundSecondary"))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous)) // Smooth corners
-                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5) // Soft drop shadow
-                .padding(.horizontal) // Spacing outside the card
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding(.horizontal)
                 
                 Spacer()
-                
             }
-            
         }
+        .task {
+            await viewModel.loadProfile()
+        }
+    }
+
+    private var profileCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if viewModel.isLoading && viewModel.profile == nil {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 64)
+            } else if let profile = viewModel.profile {
+                profileContent(profile)
+            } else {
+                profileErrorContent
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Constants.backgroundSecondaryColor)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .padding(.horizontal)
+    }
+
+    private func profileContent(_ profile: Profile) -> some View {
+        HStack {
+            Image(systemName: "person.crop.circle")
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundStyle(Constants.primaryTextColor)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(profile.username)
+                    .font(.body)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Constants.secondaryTextColor)
+                
+                Text(memberSinceText(for: profile.createdAt))
+                    .font(.body)
+                    .foregroundStyle(Constants.secondaryTextColor)
+            }
+            Spacer()
+                
+            Button("Edit") {
+                print("edit Profile")
+            }
+            .padding()
+            .background(.buttonBackground)
+            .foregroundColor(.buttonForeground)
+            .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        }
+    }
+
+    private var profileErrorContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(viewModel.errorMessage ?? "Profile unavailable")
+                .font(.body)
+                .fontWeight(.semibold)
+                .foregroundStyle(Constants.secondaryTextColor)
+
+            Button("Retry") {
+                Task {
+                    await viewModel.loadProfile()
+                }
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(.buttonBackground)
+            .foregroundColor(.buttonForeground)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+
+    private func memberSinceText(for date: Date?) -> String {
+        guard let date else {
+            return "Member since unknown"
+        }
+
+        let year = Calendar.current.component(.year, from: date)
+        return "Member since \(year)"
     }
 
     private func statCard(value: String, title: String) -> some View {

@@ -44,6 +44,10 @@ final class AppBlockingModel {
         isPickerPresented = true
     }
 
+    func updateActivitySelection(_ selection: FamilyActivitySelection) {
+        activitySelection = selection
+    }
+
     func selectDuration(minutes: Int) {
         selectedDurationMinutes = minutes
     }

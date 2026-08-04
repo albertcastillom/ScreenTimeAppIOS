@@ -23,10 +23,14 @@ struct SessionView: View {
         GridItem(.flexible()),
     ]
     
+    @State private var appBlockingModel = AppBlockingModel()
+    @State private var activitySelection = FamilyActivitySelection()
     //passed blocking model from home view
-    let appBlockingModel: AppBlockingModel
+   // let appBlockingModel: AppBlockingModel
     
     var body: some View {
+        @Bindable var appBlockingModel = appBlockingModel
+        
         ZStack{
             Color("Background").ignoresSafeArea(edges: .all)
             
@@ -77,10 +81,6 @@ struct SessionView: View {
                                 .fontWeight(.bold)
                                 .foregroundStyle(Constants.primaryTextColor)
                             
-                            Text("Social + Entertainment apps will be paused during you session.")
-                                .foregroundStyle(Constants.secondaryTextColor)
-                                .fontWeight(.semibold)
-                            
                             if appBlockingModel.blockedSelectionSummary.isEmpty {
                                 Text("No apps selected")
                                     .font(.body)
@@ -93,7 +93,20 @@ struct SessionView: View {
                                 }
                             }
                 
-
+                            Button{
+                                appBlockingModel.presentAppPicker()
+                            } label: {
+                                Text("Choose Apps to Block")
+                                    .frame(width: 325, height: 48)
+                                    .font(.headline)
+                                    .background(.buttonBackground)
+                                    .foregroundColor(.buttonForeground)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            }
+                            .familyActivityPicker(
+                                isPresented: $appBlockingModel.isPickerPresented,
+                                selection: $activitySelection
+                            )
                         }
                         .padding(20) // Spacing inside the card
                         .frame(maxWidth: .infinity, alignment: .leading) // Fills available horizontal width
@@ -142,6 +155,10 @@ struct SessionView: View {
         }
         .onAppear {
             appBlockingModel.refreshBlockingState()
+            activitySelection = appBlockingModel.activitySelection
+        }
+        .onChange(of: activitySelection) { _, newSelection in
+            appBlockingModel.updateActivitySelection(newSelection)
         }
     }
 
@@ -199,5 +216,5 @@ struct SessionView: View {
 }
 
 #Preview {
-    SessionView(appBlockingModel: AppBlockingModel())
+    SessionView()
 }

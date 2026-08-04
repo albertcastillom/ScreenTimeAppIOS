@@ -9,27 +9,26 @@ import Foundation
 import FamilyControls
 internal import Combine
 
-class PermissionManager: ObservableObject {
-    @Published var authorizationStatus: FamilyControls.AuthorizationStatus = .notDetermined
+@MainActor
+final class PermissionManager: ObservableObject {
+    @Published private(set) var authorizationStatus: FamilyControls.AuthorizationStatus
     
     init() {
-        Task {
-            await checkAuthorization()
-        }
+        authorizationStatus = AuthorizationCenter.shared.authorizationStatus
     }
     
     func requestAuthorization() async {
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-            self.authorizationStatus = AuthorizationCenter.shared.authorizationStatus
+            authorizationStatus = AuthorizationCenter.shared.authorizationStatus
         } catch {
-            print ("Failed to request authorization")
-            self.authorizationStatus = .denied
+            authorizationStatus = AuthorizationCenter.shared.authorizationStatus
+            print("Failed to request Screen Time authorization: \(error)")
         }
     }
     
-    func checkAuthorization() async {
-        self.authorizationStatus = AuthorizationCenter.shared.authorizationStatus
+    func checkAuthorization() {
+        authorizationStatus = AuthorizationCenter.shared.authorizationStatus
     }
 }
  
