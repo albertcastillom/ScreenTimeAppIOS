@@ -43,7 +43,7 @@ struct Friendship: Codable, Identifiable, Equatable {
         case addresseeID = "addressee_id"
         case status
         case createdAt = "created_at"
-        case respondedAt = "responded_At"
+        case respondedAt = "responded_at"
     }
 }
 
@@ -95,7 +95,7 @@ struct SupabaseService {
         )
     }
 
-    // MARK: - Profiles
+    //Profiles
 
     func getCurrentProfile() async throws -> Profile {
         try await getProfile(id: currentUserID())
@@ -147,7 +147,7 @@ struct SupabaseService {
             .execute()
     }
 
-    // MARK: - Friendships
+    //Friendships
 
     func getFriends() async throws -> [Profile] {
         let currentUserID = try await currentUserID()
@@ -243,7 +243,7 @@ struct SupabaseService {
             .execute()
     }
 
-    // MARK: - Focus Requests
+    //Focus Requests
 
     func getIncomingFocusRequests() async throws -> [FocusRequest] {
         let userID = try await currentUserID()
@@ -251,7 +251,7 @@ struct SupabaseService {
         return try await client
             .from("focus_requests")
             .select()
-            .eq("recipient_id", value: userID.uuidString)
+            .eq("approver_id", value: userID.uuidString)
             .execute()
             .value
     }
@@ -294,28 +294,39 @@ struct SupabaseService {
             .value
     }
 
-    func updateFocusRequestStatus(id: UUID, status: FocusRequestStatus) async throws -> FocusRequest {
-        let payload = FocusRequestStatusUpdatePayload(status: status)
-
-        return try await client
-            .from("focus_requests")
-            .update(payload)
-            .eq("id", value: id.uuidString)
-            .select()
+    func acceptFocusRequest(id: UUID) async throws -> FocusRequest {
+        try await client
+            .rpc("accept_focus_request", params: FocusRequestRPCPayload(requestID: id))
             .single()
             .execute()
             .value
     }
 
-    func deleteFocusRequest(id: UUID) async throws {
+    func declineFocusRequest(id: UUID) async throws -> FocusRequest {
         try await client
-            .from("focus_requests")
-            .delete()
-            .eq("id", value: id.uuidString)
+            .rpc("decline_focus_request", params: FocusRequestRPCPayload(requestID: id))
+            .single()
             .execute()
+            .value
     }
 
-    // MARK: - Helpers
+    func activateFocusRequest(id: UUID) async throws -> FocusRequest {
+        try await client
+            .rpc("mark_focus_request_activated", params: FocusRequestRPCPayload(requestID: id))
+            .single()
+            .execute()
+            .value
+    }
+
+    func cancelFocusRequest(id: UUID) async throws -> FocusRequest {
+        try await client
+            .rpc("cancel_focus_request", params: FocusRequestRPCPayload(requestID: id))
+            .single()
+            .execute()
+            .value
+    }
+
+    // Helpers functions
 
     private func resolvedUserID(_ userID: UUID?) async throws -> UUID {
         if let userID {
@@ -372,11 +383,11 @@ private struct FocusRequestInsertPayload: Encodable {
     }
 }
 
-private struct FocusRequestStatusUpdatePayload: Encodable {
-    let status: FocusRequestStatus
+private struct FocusRequestRPCPayload: Encodable {
+    let requestID: UUID
 
     enum CodingKeys: String, CodingKey {
-        case status
+        case requestID = "request_id"
     }
 }
 
