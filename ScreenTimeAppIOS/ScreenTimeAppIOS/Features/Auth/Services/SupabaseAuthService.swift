@@ -41,9 +41,18 @@ struct SupabaseAuthService {
     func signOut() async throws {
         try await client.auth.signOut()
     }
+
+    func deleteAccount() async throws {
+        let _: DeleteAccountResponse = try await client.functions.invoke("delete-account")
+        try await client.auth.signOut(scope: .local)
+    }
     
     func getAuthState() async throws -> AuthenticationState{
         let user = try? await client.auth.session.user
         return user == nil ? .notAuthenticated : .authenticated
     }
+}
+
+private struct DeleteAccountResponse: Decodable {
+    let success: Bool
 }

@@ -12,6 +12,8 @@ final class AuthManager{
     private let service: SupabaseAuthService
     
     var authState: AuthenticationState = .notDetermined
+    var isDeletingAccount = false
+    var accountDeletionError: String?
     
     init(service: SupabaseAuthService) {
         self.service = service
@@ -40,6 +42,24 @@ final class AuthManager{
         }catch{
             print("DEBUG: Error Signing out: \(error)")
         }
+    }
+
+    
+    func deleteAccount() async {
+        guard !isDeletingAccount else { return }
+
+        isDeletingAccount = true
+        accountDeletionError = nil
+
+        do {
+            try await service.deleteAccount()
+            authState = .notAuthenticated
+        } catch {
+            accountDeletionError = "We couldn't delete your account. Please try again."
+            print("DEBUG: Error deleting account: \(error)")
+        }
+
+        isDeletingAccount = false
     }
     
     func getAuthState() async {

@@ -188,6 +188,7 @@ struct FriendsView: View {
             Spacer()
             Button("Add") {
                 Task {
+                    print(profile)
                     await viewModel.sendFriendRequest(to: profile)
                 }
             }

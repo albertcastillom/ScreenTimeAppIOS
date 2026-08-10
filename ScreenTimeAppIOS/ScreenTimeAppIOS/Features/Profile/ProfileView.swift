@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @Environment(AuthManager.self) private var authManager
     @State private var viewModel = ProfileViewModel()
+    @State private var isShowingDeleteConfirmation = false
 
     var body: some View {
         ZStack {
@@ -78,12 +80,55 @@ struct ProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .padding(.horizontal)
+
+                Button(role: .destructive) {
+                    isShowingDeleteConfirmation = true
+                } label: {
+                    if authManager.isDeletingAccount {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text("Delete Account")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .disabled(authManager.isDeletingAccount)
+                .padding()
+                .background(Color.red.opacity(0.12))
+                .foregroundStyle(.red)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
                 
                 Spacer()
             }
         }
         .task {
             await viewModel.loadProfile()
+        }
+        .alert("Delete your account?", isPresented: $isShowingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    await authManager.deleteAccount()
+                }
+            }
+        } message: {
+            Text("This permanently deletes your account, profile, friendships, and focus requests. This action cannot be undone.")
+        }
+        .alert(
+            "Unable to Delete Account",
+            isPresented: Binding(
+                get: { authManager.accountDeletionError != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        authManager.accountDeletionError = nil
+                    }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(authManager.accountDeletionError ?? "Please try again.")
         }
     }
 
@@ -191,4 +236,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
+        .environment(AuthManager(service: SupabaseAuthService()))
 }
