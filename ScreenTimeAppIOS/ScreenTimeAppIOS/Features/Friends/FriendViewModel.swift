@@ -13,6 +13,7 @@ import Observation
 final class FriendViewModel {
     var friends: [Profile] = []
     var pendingRequests: [Friendship] = []
+    var pendingRequestProfilesByID: [UUID: Profile] = [:]
     var searchResults: [Profile] = []
     var isLoading = false
     var errorMessage: String?
@@ -45,12 +46,19 @@ final class FriendViewModel {
 
             self.friends = try await friends
             self.pendingRequests = try await pendingRequests
+            self.pendingRequestProfilesByID = try await loadProfilesByID(
+                self.pendingRequests.map(\.requesterID)
+            )
         } catch {
             errorMessage = "Failed to load friends."
             print("DEBUG: Failed to load friends screen: \(error)")
         }
 
         isLoading = false
+    }
+
+    func usernameForPendingRequest(_ request: Friendship) -> String {
+        pendingRequestProfilesByID[request.requesterID]?.username ?? "Unknown user"
     }
 
     func searchProfiles(usernameQuery: String) async {
@@ -114,4 +122,15 @@ final class FriendViewModel {
             print("DEBUG: Failed to remove friend: \(error)")
         }
     }
+
+    private func loadProfilesByID(_ ids: [UUID]) async throws -> [UUID: Profile] {
+        var profilesByID: [UUID: Profile] = [:]
+
+        for id in Set(ids) {
+            profilesByID[id] = try await service.getProfile(id: id)
+        }
+
+        return profilesByID
+    }
+    
 }

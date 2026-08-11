@@ -41,7 +41,12 @@ struct FriendsView: View {
                        .padding(.horizontal)
                }
                
-               pendingRequestsCard
+               
+               
+               if !viewModel.pendingRequests.isEmpty{
+                   pendingRequestsCard
+               }
+              
                friendsCard
                searchCard
                
@@ -165,7 +170,7 @@ struct FriendsView: View {
 
     private func pendingRequestRow(_ request: Friendship) -> some View {
         HStack {
-            Text("Friend request")
+            Text(viewModel.usernameForPendingRequest(request))
                 .foregroundStyle(Color("PrimaryText"))
             Spacer()
             Button("Accept") {
