@@ -11,6 +11,8 @@ import Observation
 @Observable
 @MainActor
 final class FriendViewModel {
+    // MARK: - View State
+
     var friends: [Profile] = []
     var pendingRequests: [Friendship] = []
     var pendingRequestProfilesByID: [UUID: Profile] = [:]
@@ -20,6 +22,8 @@ final class FriendViewModel {
 
     private let service: SupabaseService
 
+    // MARK: - Initialization
+
     init() {
         self.service = SupabaseService()
     }
@@ -28,6 +32,8 @@ final class FriendViewModel {
         self.service = service
     }
 
+    // MARK: - Derived State
+
     var friendsCount: Int {
         friends.count
     }
@@ -35,6 +41,8 @@ final class FriendViewModel {
     var hasPendingRequests: Bool {
         !pendingRequests.isEmpty
     }
+
+    // MARK: - Screen Loading
 
     func loadFriendsScreen() async {
         isLoading = true
@@ -51,15 +59,12 @@ final class FriendViewModel {
             )
         } catch {
             errorMessage = "Failed to load friends."
-            print("DEBUG: Failed to load friends screen: \(error)")
         }
 
         isLoading = false
     }
 
-    func usernameForPendingRequest(_ request: Friendship) -> String {
-        pendingRequestProfilesByID[request.requesterID]?.username ?? "Unknown user"
-    }
+    // MARK: - Search
 
     func searchProfiles(usernameQuery: String) async {
         let trimmedQuery = usernameQuery.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -72,18 +77,13 @@ final class FriendViewModel {
             searchResults = try await service.searchProfiles(usernameQuery: trimmedQuery)
         } catch {
             errorMessage = "Failed to search profiles."
-            print("DEBUG: Failed to search profiles: \(error)")
         }
     }
 
-    func sendFriendRequest(to profile: Profile) async {
-        do {
-            _ = try await service.sendFriendRequest(to: profile.id)
-            searchResults.removeAll { $0.id == profile.id }
-        } catch {
-            errorMessage = "Failed to send friend request."
-            print("DEBUG: Failed to send friend request: \(error)")
-        }
+    // MARK: - Pending Requests
+
+    func usernameForPendingRequest(_ request: Friendship) -> String {
+        pendingRequestProfilesByID[request.requesterID]?.username ?? "Unknown user"
     }
 
     func acceptFriendRequest(_ request: Friendship) async {
@@ -92,7 +92,6 @@ final class FriendViewModel {
             await loadFriendsScreen()
         } catch {
             errorMessage = "Failed to accept friend request."
-            print("DEBUG: Failed to accept friend request: \(error)")
         }
     }
 
@@ -100,18 +99,26 @@ final class FriendViewModel {
         do {
             _ = try await service.rejectFriendRequest(id: request.id)
             pendingRequests.removeAll { $0.id == request.id }
+            removePendingProfileIfUnused(for: request.requesterID)
         } catch {
             errorMessage = "Failed to reject friend request."
-            print("DEBUG: Failed to reject friend request: \(error)")
+        }
+    }
+
+    // MARK: - Friend Actions
+
+    func sendFriendRequest(to profile: Profile) async {
+        do {
+            _ = try await service.sendFriendRequest(to: profile.id)
+            searchResults.removeAll { $0.id == profile.id }
+        } catch {
+            errorMessage = "Failed to send friend request."
         }
     }
 
     func removeFriend(_ profile: Profile) async {
         do {
-            let friendships = try await service.getAcceptedFriendships()
-            guard let friendship = friendships.first(where: { friendship in
-                friendship.requesterID == profile.id || friendship.addresseeID == profile.id
-            }) else {
+            guard let friendship = try await acceptedFriendship(with: profile) else {
                 return
             }
 
@@ -119,7 +126,15 @@ final class FriendViewModel {
             friends.removeAll { $0.id == profile.id }
         } catch {
             errorMessage = "Failed to remove friend."
-            print("DEBUG: Failed to remove friend: \(error)")
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func acceptedFriendship(with profile: Profile) async throws -> Friendship? {
+        let friendships = try await service.getAcceptedFriendships()
+        return friendships.first { friendship in
+            friendship.requesterID == profile.id || friendship.addresseeID == profile.id
         }
     }
 
@@ -132,5 +147,10 @@ final class FriendViewModel {
 
         return profilesByID
     }
-    
+
+    private func removePendingProfileIfUnused(for requesterID: UUID) {
+        if !pendingRequests.contains(where: { $0.requesterID == requesterID }) {
+            pendingRequestProfilesByID.removeValue(forKey: requesterID)
+        }
+    }
 }

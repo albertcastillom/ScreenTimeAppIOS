@@ -9,6 +9,7 @@ import SwiftUI
 import FamilyControls
 
 struct SessionView: View {
+    //grid util
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -19,12 +20,14 @@ struct SessionView: View {
         GridItem(.flexible()),
         GridItem(.flexible()),
     ]
-
-    @State private var appBlockingModel = AppBlockingModel()
+    private let durations = [15, 25, 30, 45, 60, 90]
+    
+    //state vars
+    @Environment(AppBlockingModel.self) private var appBlockingModel
     @State private var focusSessionViewModel = FocusSessionViewModel()
     @State private var activitySelection = FamilyActivitySelection()
 
-    private let durations = [15, 25, 30, 45, 60, 90]
+
 
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
@@ -34,6 +37,7 @@ struct SessionView: View {
 
             ScrollView {
                 VStack {
+                    //Page Title
                     HStack {
                         Text("Start Focus Session")
                             .font(.title)
@@ -43,7 +47,8 @@ struct SessionView: View {
 
                         Spacer()
                     }
-
+                    
+                    //Duration Selections
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Duration")
                             .font(.title2)
@@ -62,7 +67,8 @@ struct SessionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
-
+                    
+                    //Block apps selection carc
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What Gets Blocked")
                             .font(.title2)
@@ -102,7 +108,8 @@ struct SessionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
-
+                    
+                    //friends to notify card
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Choose a friend to notify")
                             .font(.title2)
@@ -129,7 +136,8 @@ struct SessionView: View {
                     if focusSessionViewModel.hasSentFocusSessions {
                         sentFocusRequestsCard
                     }
-
+                    
+                    //error messages with focus request
                     if let errorMessage = focusSessionViewModel.errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
@@ -137,7 +145,8 @@ struct SessionView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
                     }
-
+                    
+                    //local block apps button(move later)
                     Button {
                         appBlockingModel.toggleFocusSession()
                     } label: {
@@ -148,7 +157,8 @@ struct SessionView: View {
                             .foregroundColor(.buttonForeground)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
-
+                    
+                    //send request to a friend
                     Button {
                         Task {
                             await focusSessionViewModel.sendFocusSessionRequest()
@@ -287,4 +297,5 @@ struct SessionView: View {
 
 #Preview {
     SessionView()
+        .environment(AppBlockingModel())
 }

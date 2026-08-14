@@ -11,17 +11,27 @@ import Observation
 @Observable
 @MainActor
 final class FocusSessionViewModel {
+    // MARK: - View State
+
     var friends: [Profile] = []
     var pendingFocusSessions: [FocusRequest] = []
     var sentFocusSessions: [FocusRequest] = []
+
     var pendingRequestProfilesByID: [UUID: Profile] = [:]
     var sentRequestProfilesByID: [UUID: Profile] = [:]
+
     var selectedFriend: Profile?
     var selectedDurationMinutes: Int?
+
     var isLoading = false
     var errorMessage: String?
 
+    // MARK: - Dependencies
+
     private let service: SupabaseService
+    private var acceptedFocusRequestListenerTask: Task<Void, Never>?
+
+    // MARK: - Initialization
 
     init() {
         self.service = SupabaseService()
@@ -31,6 +41,8 @@ final class FocusSessionViewModel {
         self.service = service
     }
 
+    // MARK: - Derived State
+
     var hasPendingFocusSessions: Bool {
         !pendingFocusSessions.isEmpty
     }
@@ -39,9 +51,7 @@ final class FocusSessionViewModel {
         !sentFocusSessions.isEmpty
     }
 
-    var hasSelectedSessionDetails: Bool {
-        selectedFriend != nil && selectedDurationMinutes != nil
-    }
+    // MARK: - Screen Loading
 
     func loadFocusSessionScreen() async {
         isLoading = true
@@ -63,11 +73,52 @@ final class FocusSessionViewModel {
             )
         } catch {
             errorMessage = "Failed to load focus sessions."
-            print("DEBUG: Failed to load focus sessions: \(error)")
         }
 
         isLoading = false
     }
+
+    // MARK: - Realtime Accepted Requests
+
+    func startListeningForAcceptedFocusRequests(
+        onAccepted: @escaping @MainActor (FocusRequest) async -> Void
+    ) {
+        acceptedFocusRequestListenerTask?.cancel()
+
+        acceptedFocusRequestListenerTask = Task { [weak self] in
+            guard let self else {
+                return
+            }
+
+            do {
+                let updates = try await service.acceptedFocusRequestUpdates()
+
+                for await request in updates {
+                    handleAcceptedFocusRequest(request)
+                    await onAccepted(request)
+                }
+            } catch {
+                setRealtimeError()
+            }
+        }
+    }
+
+    func stopListeningForAcceptedFocusRequests() {
+        acceptedFocusRequestListenerTask?.cancel()
+        acceptedFocusRequestListenerTask = nil
+    }
+
+    // Used as a startup fallback in case realtime missed an accepted request while the app was closed.
+    func loadAcceptedOutgoingFocusRequests() async -> [FocusRequest] {
+        do {
+            return try await service.getAcceptedOutgoingFocusRequests()
+        } catch {
+            errorMessage = "Failed to load accepted focus requests."
+            return []
+        }
+    }
+
+    // MARK: - Selection
 
     func selectFriend(_ friend: Profile) {
         selectedFriend = friend
@@ -77,6 +128,8 @@ final class FocusSessionViewModel {
         selectedDurationMinutes = minutes
     }
 
+    // MARK: - Display Helpers
+
     func usernameForPendingFocusSessionRequest(_ request: FocusRequest) -> String {
         pendingRequestProfilesByID[request.requesterID]?.username ?? "Unknown user"
     }
@@ -84,6 +137,8 @@ final class FocusSessionViewModel {
     func usernameForSentFocusSessionRequest(_ request: FocusRequest) -> String {
         sentRequestProfilesByID[request.approverID]?.username ?? "Unknown user"
     }
+
+    // MARK: - Send Requests
 
     func sendFocusSessionRequest() async {
         guard let selectedFriend else {
@@ -108,15 +163,13 @@ final class FocusSessionViewModel {
                 durationMinutes: durationMinutes
             )
             sentFocusSessions.append(request)
-
-            if let selectedFriend, selectedFriend.id == approverID {
-                sentRequestProfilesByID[approverID] = selectedFriend
-            }
+            cacheSentProfileIfSelected(approverID: approverID)
         } catch {
             errorMessage = "Failed to send focus request."
-            print("DEBUG: Failed to send focus request: \(error)")
         }
     }
+
+    // MARK: - Incoming Request Actions
 
     func acceptFocusSessionRequest(_ request: FocusRequest) async {
         errorMessage = nil
@@ -127,7 +180,6 @@ final class FocusSessionViewModel {
             removePendingProfileIfUnused(for: request.requesterID)
         } catch {
             errorMessage = "Failed to accept focus request."
-            print("DEBUG: Failed to accept focus request: \(error)")
         }
     }
 
@@ -140,9 +192,10 @@ final class FocusSessionViewModel {
             removePendingProfileIfUnused(for: request.requesterID)
         } catch {
             errorMessage = "Failed to reject focus request."
-            print("DEBUG: Failed to reject focus request: \(error)")
         }
     }
+
+    // MARK: - Outgoing Request Actions
 
     func cancelFocusSessionRequest(_ request: FocusRequest) async {
         errorMessage = nil
@@ -153,8 +206,28 @@ final class FocusSessionViewModel {
             removeSentProfileIfUnused(for: request.approverID)
         } catch {
             errorMessage = "Failed to cancel focus request."
-            print("DEBUG: Failed to cancel focus request: \(error)")
         }
+    }
+
+    func markFocusSessionActivated(_ request: FocusRequest) async {
+        errorMessage = nil
+
+        do {
+            _ = try await service.activateFocusRequest(id: request.id)
+        } catch {
+            errorMessage = "Failed to mark focus request active."
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func handleAcceptedFocusRequest(_ request: FocusRequest) {
+        sentFocusSessions.removeAll { $0.id == request.id }
+        removeSentProfileIfUnused(for: request.approverID)
+    }
+
+    private func setRealtimeError() {
+        errorMessage = "Failed to listen for accepted focus requests."
     }
 
     private func loadProfilesByID(_ ids: [UUID]) async throws -> [UUID: Profile] {
@@ -165,6 +238,12 @@ final class FocusSessionViewModel {
         }
 
         return profilesByID
+    }
+
+    private func cacheSentProfileIfSelected(approverID: UUID) {
+        if let selectedFriend, selectedFriend.id == approverID {
+            sentRequestProfilesByID[approverID] = selectedFriend
+        }
     }
 
     private func removePendingProfileIfUnused(for requesterID: UUID) {

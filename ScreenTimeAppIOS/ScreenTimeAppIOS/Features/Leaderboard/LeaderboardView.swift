@@ -13,6 +13,7 @@ struct LeaderboardView: View {
            Color("Background").ignoresSafeArea(edges: .all)
            
            VStack {
+               //leaderboard title
                HStack {
                    Text("Leaderboard")
                        .font(.largeTitle)
@@ -24,6 +25,7 @@ struct LeaderboardView: View {
                .padding(.horizontal)
                .padding(.top)
                
+               //Filters
                HStack(spacing: 8) {
                    filterButton("This Week")
                    filterButton("This Month")
@@ -31,6 +33,7 @@ struct LeaderboardView: View {
                }
                .padding(.horizontal)
                
+               //Friends ranked (leaderboard)
                VStack(alignment: .leading, spacing: 12) {
     
                    HStack{

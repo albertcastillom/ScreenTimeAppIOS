@@ -20,7 +20,6 @@ final class AppBlockingModel {
     var isPickerPresented = false
     var isBlocking = false
     var selectedDurationMinutes: Int?
-    var selectedFriend: String?
     var sessionEndDate: Date?
 
     @ObservationIgnored private let restrictionsService: RestrictionsService
@@ -52,32 +51,23 @@ final class AppBlockingModel {
         selectedDurationMinutes = minutes
     }
 
-    func selectFriend(_ friend: String) {
-        selectedFriend = friend
-    }
-
-    func startFocusSession() {
+    @discardableResult
+    func startFocusSession() -> Bool {
         guard hasSelectedApps else {
-            print("No apps, categories, or websites selected.")
-            return
+            return false
         }
 
         guard let selectedDurationMinutes else {
-            print("No duration selected.")
-            return
-        }
-
-        guard selectedFriend != nil else {
-            print("No friend selected.")
-            return
+            return false
         }
 
         guard restrictionsService.activateRestrictions(selection: activitySelection, minutes: selectedDurationMinutes) else {
-            return
+            return false
         }
 
         let endDate = Date().addingTimeInterval(TimeInterval(selectedDurationMinutes * 60))
         saveBlockingState(isBlocking: true, sessionEndDate: endDate)
+        return true
     }
 
     func stopFocusSession() {

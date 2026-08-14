@@ -8,19 +8,21 @@
 import Foundation
 import Supabase
 
+// MARK: - Profile Models
+
 struct Profile: Codable, Identifiable, Equatable {
     let id: UUID
     var username: String
     var createdAt: Date?
 
-
     enum CodingKeys: String, CodingKey {
         case id
         case username
         case createdAt = "created_at"
-   
     }
 }
+
+// MARK: - Friendship Models
 
 enum FriendshipStatus: String, Codable {
     case pending
@@ -46,6 +48,8 @@ struct Friendship: Codable, Identifiable, Equatable {
         case respondedAt = "responded_at"
     }
 }
+
+// MARK: - Focus Request Models
 
 enum FocusRequestStatus: String, Codable {
     case pending
@@ -81,9 +85,11 @@ struct FocusRequest: Codable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Supabase Service
+
 struct SupabaseService {
     private let client: SupabaseClient
-    
+
     init() {
         guard let projectURL = URL(string: AppConstants.projectURLString) else {
             preconditionFailure("Invalid Supabase project URL")
@@ -95,7 +101,7 @@ struct SupabaseService {
         )
     }
 
-    //Profiles
+    // MARK: Profiles
 
     func getCurrentProfile() async throws -> Profile {
         try await getProfile(id: currentUserID())
@@ -125,9 +131,7 @@ struct SupabaseService {
     }
 
     func updateProfile(id: UUID, username: String? = nil) async throws -> Profile {
-        let payload = ProfileUpdatePayload(
-            username: username,
-        )
+        let payload = ProfileUpdatePayload(username: username)
 
         return try await client
             .from("profiles")
@@ -147,7 +151,7 @@ struct SupabaseService {
             .execute()
     }
 
-    //Friendships
+    // MARK: Friendships - Reads
 
     func getFriends() async throws -> [Profile] {
         let currentUserID = try await currentUserID()
@@ -198,6 +202,8 @@ struct SupabaseService {
             .value
     }
 
+    // MARK: Friendships - Writes
+
     func sendFriendRequest(to addresseeID: UUID) async throws -> Friendship {
         let payload = FriendshipInsertPayload(
             requesterID: try await currentUserID(),
@@ -208,19 +214,6 @@ struct SupabaseService {
         return try await client
             .from("friendships")
             .insert(payload)
-            .select()
-            .single()
-            .execute()
-            .value
-    }
-
-    func updateFriendshipStatus(id: UUID, status: FriendshipStatus) async throws -> Friendship {
-        let payload = FriendshipStatusUpdatePayload(status: status)
-
-        return try await client
-            .from("friendships")
-            .update(payload)
-            .eq("id", value: id.uuidString)
             .select()
             .single()
             .execute()
@@ -243,7 +236,20 @@ struct SupabaseService {
             .execute()
     }
 
-    //Focus Requests
+    private func updateFriendshipStatus(id: UUID, status: FriendshipStatus) async throws -> Friendship {
+        let payload = FriendshipStatusUpdatePayload(status: status)
+
+        return try await client
+            .from("friendships")
+            .update(payload)
+            .eq("id", value: id.uuidString)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
+
+    // MARK: Focus Requests - Reads
 
     func getIncomingFocusRequests() async throws -> [FocusRequest] {
         let userID = try await currentUserID()
@@ -267,15 +273,19 @@ struct SupabaseService {
             .value
     }
 
-    func getFocusRequestDurations() async throws -> [Int] {
-        let requests: [FocusRequestDuration] = try await client
+    func getAcceptedOutgoingFocusRequests() async throws -> [FocusRequest] {
+        let userID = try await currentUserID()
+
+        return try await client
             .from("focus_requests")
-            .select("duration_minutes")
+            .select()
+            .eq("requester_id", value: userID.uuidString)
+            .eq("status", value: FocusRequestStatus.accepted.rawValue)
             .execute()
             .value
-
-        return requests.map(\.durationMinutes)
     }
+
+    // MARK: Focus Requests - Writes
 
     func createFocusRequest(approverID: UUID, durationMinutes: Int) async throws -> FocusRequest {
         let payload = FocusRequestInsertPayload(
@@ -326,7 +336,55 @@ struct SupabaseService {
             .value
     }
 
-    // Helpers functions
+    // MARK: Focus Requests - Realtime
+
+    func acceptedFocusRequestUpdates() async throws -> AsyncStream<FocusRequest> {
+        let requesterID = try await currentUserID()
+        let channel = client.realtimeV2.channel("focus-requests-\(requesterID.uuidString)")
+        let updates = channel.postgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "focus_requests",
+            filter: .eq("requester_id", value: requesterID)
+        )
+
+        return AsyncStream { continuation in
+            let task = Task {
+                do {
+                    try await channel.subscribeWithError()
+
+                    for await update in updates {
+                        guard let request = decodeAcceptedFocusRequest(from: update) else {
+                            continue
+                        }
+                        continuation.yield(request)
+                    }
+                } catch {
+                    continuation.finish()
+                }
+            }
+
+            continuation.onTermination = { _ in
+                task.cancel()
+                Task {
+                    await channel.unsubscribe()
+                }
+            }
+        }
+    }
+
+    private func decodeAcceptedFocusRequest(from update: UpdateAction) -> FocusRequest? {
+        guard let record = try? update.decodeRecord(
+            as: FocusRequestRealtimeRecord.self,
+            decoder: JSONDecoder()
+        ), record.status == .accepted else {
+            return nil
+        }
+
+        return record.focusRequest
+    }
+
+    // MARK: Helpers
 
     private func resolvedUserID(_ userID: UUID?) async throws -> UUID {
         if let userID {
@@ -340,6 +398,8 @@ struct SupabaseService {
         try await client.auth.session.user.id
     }
 }
+
+// MARK: - Request Payloads
 
 private struct ProfileUpdatePayload: Encodable {
     let username: String?
@@ -391,10 +451,34 @@ private struct FocusRequestRPCPayload: Encodable {
     }
 }
 
-private struct FocusRequestDuration: Decodable {
+// MARK: - Realtime Payloads
+
+private struct FocusRequestRealtimeRecord: Decodable {
+    let id: UUID
+    let requesterID: UUID
+    let approverID: UUID
     let durationMinutes: Int
+    let status: FocusRequestStatus
 
     enum CodingKeys: String, CodingKey {
+        case id
+        case requesterID = "requester_id"
+        case approverID = "approver_id"
         case durationMinutes = "duration_minutes"
+        case status
+    }
+
+    var focusRequest: FocusRequest {
+        FocusRequest(
+            id: id,
+            requesterID: requesterID,
+            approverID: approverID,
+            durationMinutes: durationMinutes,
+            status: status,
+            createdAt: nil,
+            respondedAt: nil,
+            activatedAt: nil,
+            endsAt: nil
+        )
     }
 }

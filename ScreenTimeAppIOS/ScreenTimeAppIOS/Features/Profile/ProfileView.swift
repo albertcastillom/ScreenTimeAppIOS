@@ -15,7 +15,6 @@ struct ProfileView: View {
     var body: some View {
         ZStack {
             Constants.backgroundColor.ignoresSafeArea(edges: .all)
-            
             VStack {
                 HStack {
                     Text("Profile")
@@ -30,6 +29,7 @@ struct ProfileView: View {
                 
                 profileCard
                 
+                //Stats card
                 HStack(spacing: 12) {
                     statCard(value: "20", title: "Sessions")
                     statCard(value: "3d", title: "Streak")
@@ -38,6 +38,7 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal)
                 
+                // Notification card
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Notifications")
                         .font(.title2)
@@ -63,6 +64,7 @@ struct ProfileView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .padding(.horizontal)
                 
+                //Privacy Policy
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Privacy Policy")
                         .font(.body)
@@ -80,7 +82,22 @@ struct ProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .padding(.horizontal)
-
+                
+                //Signout Button
+                Button {
+                    Task {
+                        await authManager.signOut()
+                    }
+                } label: {
+                    Text("Sign Out")
+                        .frame(width: 360, height: 48)
+                        .font(.headline)
+                        .background(.buttonBackground)
+                        .foregroundColor(.buttonForeground)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                
+                //Delete account
                 Button(role: .destructive) {
                     isShowingDeleteConfirmation = true
                 } label: {

@@ -19,6 +19,7 @@ struct HomeView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
+                    //Home and profile Hstack
                     HStack {
                         Text("Home")
                             .font(.largeTitle)
@@ -36,7 +37,8 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top)
-
+                    
+                    //focus session card
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Start a focus Session")
                             .font(.title2)
@@ -60,7 +62,8 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
-
+                    
+                    //if focus sessions requests are not empty show them
                     if focusSessionViewModel.hasPendingFocusSessions {
                         incomingFocusRequestsCard
                     }
@@ -72,19 +75,7 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
                     }
-
-                    Button {
-                        Task {
-                            await authManager.signOut()
-                        }
-                    } label: {
-                        Text("Sign Out")
-                            .frame(width: 360, height: 48)
-                            .font(.headline)
-                            .background(.buttonBackground)
-                            .foregroundColor(.buttonForeground)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    }
+                    
 
                     Spacer(minLength: 0)
                 }

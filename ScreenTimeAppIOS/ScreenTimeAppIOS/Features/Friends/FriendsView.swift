@@ -18,6 +18,7 @@ struct FriendsView: View {
                .ignoresSafeArea()
            
            VStack {
+               //Friends Title
                HStack {
                    Text("Friends")
                        .font(.largeTitle)
@@ -29,6 +30,7 @@ struct FriendsView: View {
                .padding(.horizontal)
                .padding(.top)
                
+               //if no friend requests card is hidden
                if viewModel.isLoading && viewModel.friends.isEmpty && viewModel.pendingRequests.isEmpty {
                    ProgressView()
                        .frame(maxWidth: .infinity, minHeight: 120)
@@ -41,15 +43,15 @@ struct FriendsView: View {
                        .padding(.horizontal)
                }
                
-               
-               
                if !viewModel.pendingRequests.isEmpty{
                    pendingRequestsCard
                }
               
                friendsCard
+               
                searchCard
                
+               //Add friends button
                Button(isShowingSearch ? "Close Search" : "Add Friends +") {
                    isShowingSearch.toggle()
                }
