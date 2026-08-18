@@ -10,15 +10,9 @@ import Supabase
 
 struct SupabaseAuthService {
     private let client: SupabaseClient
-    
-    init() {
-        guard let projectURL = URL(string: AppConstants.projectURLString) else {
-            preconditionFailure("Invalid Supabase project URL")
-        }
 
-        self.client = SupabaseClient(
-            supabaseURL: projectURL,
-            supabaseKey: AppConstants.projectAPIKey)
+    init(client: SupabaseClient = SupabaseClientProvider.shared) {
+        self.client = client
     }
     
     func login(withEmail email: String, password: String) async throws -> AuthenticationState{

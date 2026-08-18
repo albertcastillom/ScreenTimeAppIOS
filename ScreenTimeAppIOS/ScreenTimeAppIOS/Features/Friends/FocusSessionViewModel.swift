@@ -29,7 +29,6 @@ final class FocusSessionViewModel {
     // MARK: - Dependencies
 
     private let service: SupabaseService
-    private var acceptedFocusRequestListenerTask: Task<Void, Never>?
 
     // MARK: - Initialization
 
@@ -76,46 +75,6 @@ final class FocusSessionViewModel {
         }
 
         isLoading = false
-    }
-
-    // MARK: - Realtime Accepted Requests
-
-    func startListeningForAcceptedFocusRequests(
-        onAccepted: @escaping @MainActor (FocusRequest) async -> Void
-    ) {
-        acceptedFocusRequestListenerTask?.cancel()
-
-        acceptedFocusRequestListenerTask = Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            do {
-                let updates = try await service.acceptedFocusRequestUpdates()
-
-                for await request in updates {
-                    handleAcceptedFocusRequest(request)
-                    await onAccepted(request)
-                }
-            } catch {
-                setRealtimeError()
-            }
-        }
-    }
-
-    func stopListeningForAcceptedFocusRequests() {
-        acceptedFocusRequestListenerTask?.cancel()
-        acceptedFocusRequestListenerTask = nil
-    }
-
-    // Used as a startup fallback in case realtime missed an accepted request while the app was closed.
-    func loadAcceptedOutgoingFocusRequests() async -> [FocusRequest] {
-        do {
-            return try await service.getAcceptedOutgoingFocusRequests()
-        } catch {
-            errorMessage = "Failed to load accepted focus requests."
-            return []
-        }
     }
 
     // MARK: - Selection
@@ -209,26 +168,7 @@ final class FocusSessionViewModel {
         }
     }
 
-    func markFocusSessionActivated(_ request: FocusRequest) async {
-        errorMessage = nil
-
-        do {
-            _ = try await service.activateFocusRequest(id: request.id)
-        } catch {
-            errorMessage = "Failed to mark focus request active."
-        }
-    }
-
     // MARK: - Private Helpers
-
-    private func handleAcceptedFocusRequest(_ request: FocusRequest) {
-        sentFocusSessions.removeAll { $0.id == request.id }
-        removeSentProfileIfUnused(for: request.approverID)
-    }
-
-    private func setRealtimeError() {
-        errorMessage = "Failed to listen for accepted focus requests."
-    }
 
     private func loadProfilesByID(_ ids: [UUID]) async throws -> [UUID: Profile] {
         var profilesByID: [UUID: Profile] = [:]

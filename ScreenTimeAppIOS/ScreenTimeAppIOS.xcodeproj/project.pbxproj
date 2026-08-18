@@ -534,7 +534,7 @@
 			repositoryURL = "https://github.com/supabase/supabase-swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.5.1;
+				minimumVersion = 2.54.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

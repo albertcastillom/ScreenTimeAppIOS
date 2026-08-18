@@ -90,19 +90,11 @@ struct FocusRequest: Codable, Identifiable, Equatable {
 struct SupabaseService {
     private let client: SupabaseClient
 
-    init() {
-        guard let projectURL = URL(string: AppConstants.projectURLString) else {
-            preconditionFailure("Invalid Supabase project URL")
-        }
-
-        self.client = SupabaseClient(
-            supabaseURL: projectURL,
-            supabaseKey: AppConstants.projectAPIKey
-        )
+    init(client: SupabaseClient = SupabaseClientProvider.shared) {
+        self.client = client
     }
 
     // MARK: Profiles
-
     func getCurrentProfile() async throws -> Profile {
         try await getProfile(id: currentUserID())
     }
@@ -338,30 +330,26 @@ struct SupabaseService {
 
     // MARK: Focus Requests - Realtime
 
-    func acceptedFocusRequestUpdates() async throws -> AsyncStream<FocusRequest> {
+    func acceptedFocusRequestUpdates() async throws -> AsyncThrowingStream<FocusRequest, Error> {
         let requesterID = try await currentUserID()
-        let channel = client.realtimeV2.channel("focus-requests-\(requesterID.uuidString)")
-        let updates = channel.postgresChange(
-            UpdateAction.self,
-            schema: "public",
-            table: "focus_requests",
-            filter: .eq("requester_id", value: requesterID)
-        )
+        let topic = "focus_requests:\(requesterID.uuidString.lowercased())"
+        let channel = client.realtimeV2.channel(topic) {
+            // Database broadcasts are private and realtime.messages RLS only allows
+            // this authenticated requester to read their own topic.
+            $0.isPrivate = true
+        }
+        let updates = channel.broadcastStream(event: "UPDATE")
+        try await channel.subscribeWithError()
 
-        return AsyncStream { continuation in
+        return AsyncThrowingStream { continuation in
             let task = Task {
-                do {
-                    try await channel.subscribeWithError()
-
-                    for await update in updates {
-                        guard let request = decodeAcceptedFocusRequest(from: update) else {
-                            continue
-                        }
-                        continuation.yield(request)
+                for await message in updates {
+                    guard let request = decodeAcceptedFocusRequest(from: message) else {
+                        continue
                     }
-                } catch {
-                    continuation.finish()
+                    continuation.yield(request)
                 }
+                continuation.finish()
             }
 
             continuation.onTermination = { _ in
@@ -373,15 +361,15 @@ struct SupabaseService {
         }
     }
 
-    private func decodeAcceptedFocusRequest(from update: UpdateAction) -> FocusRequest? {
-        guard let record = try? update.decodeRecord(
-            as: FocusRequestRealtimeRecord.self,
-            decoder: JSONDecoder()
-        ), record.status == .accepted else {
+    private func decodeAcceptedFocusRequest(from message: JSONObject) -> FocusRequest? {
+        guard let payload = message["payload"],
+              let data = try? JSONEncoder().encode(payload),
+              let change = try? JSONDecoder().decode(FocusRequestBroadcastPayload.self, from: data),
+              change.record.status == .accepted else {
             return nil
         }
 
-        return record.focusRequest
+        return change.record.focusRequest
     }
 
     // MARK: Helpers
@@ -481,4 +469,8 @@ private struct FocusRequestRealtimeRecord: Decodable {
             endsAt: nil
         )
     }
+}
+
+private struct FocusRequestBroadcastPayload: Decodable {
+    let record: FocusRequestRealtimeRecord
 }

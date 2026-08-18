@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @State private var appBlockingModel = AppBlockingModel()
-    @State private var focusSessionViewModel = FocusSessionViewModel()
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var focusSessionCoordinator = FocusSessionCoordinator()
 
     var body: some View {
         TabView {
@@ -33,26 +33,23 @@ struct MainTabView: View {
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(.ultraThinMaterial, for: .tabBar)
         .task {
-            focusSessionViewModel.startListeningForAcceptedFocusRequests { request in
-                await handleAcceptedFocusRequest(request)
+            focusSessionCoordinator.start()
+        }
+        .environment(focusSessionCoordinator.appBlockingModel)
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else {
+                return
             }
 
-            for request in await focusSessionViewModel.loadAcceptedOutgoingFocusRequests() {
-                await handleAcceptedFocusRequest(request)
+            // Reconcile immediately after foregrounding; Realtime sockets can be
+            // suspended while the app is in the background.
+            focusSessionCoordinator.start()
+            Task {
+                await focusSessionCoordinator.reconcileAcceptedRequests()
             }
         }
-        .environment(appBlockingModel)
         .onDisappear {
-            focusSessionViewModel.stopListeningForAcceptedFocusRequests()
-        }
-    }
-
-    @MainActor
-    private func handleAcceptedFocusRequest(_ request: FocusRequest) async {
-        appBlockingModel.selectDuration(minutes: request.durationMinutes)
-
-        if appBlockingModel.startFocusSession() {
-            await focusSessionViewModel.markFocusSessionActivated(request)
+            focusSessionCoordinator.stop()
         }
     }
 }
