@@ -12,6 +12,7 @@ struct BlockingSessionState {
 }
 
 final class BlockingStateStore {
+    // App-group defaults are visible to both the main app and monitor extension.
     private let defaults: UserDefaults?
 
     init(defaults: UserDefaults? = UserDefaults(suiteName: ScreenTimeIdentifiers.appGroupIdentifier)) {

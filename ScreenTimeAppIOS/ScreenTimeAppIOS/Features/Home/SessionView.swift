@@ -24,11 +24,11 @@ struct SessionView: View {
     
     //state vars
     @Environment(AppBlockingModel.self) private var appBlockingModel
-    @State private var focusSessionViewModel = FocusSessionViewModel()
+    @State private var focusSessionViewModel = FocusRequestsViewModel()
     @State private var activitySelection = FamilyActivitySelection()
-
-
-
+    @State private var isPickerPresented = false
+    @State private var selectedFriend: Profile?
+    @State private var selectedDurationMinutes: Int?
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
 
@@ -82,13 +82,13 @@ struct SessionView: View {
                         } else {
                             LazyVGrid(columns: blockedAppColumns, spacing: 5) {
                                 ForEach(appBlockingModel.blockedSelectionSummary, id: \.self) { item in
-                                    BlockedAppView(app: item)
+                                    blockedSelectionBadge(item)
                                 }
                             }
                         }
 
                         Button {
-                            appBlockingModel.presentAppPicker()
+                            isPickerPresented = true
                         } label: {
                             Text("Choose Apps to Block")
                                 .frame(width: 325, height: 48)
@@ -98,7 +98,7 @@ struct SessionView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         .familyActivityPicker(
-                            isPresented: $appBlockingModel.isPickerPresented,
+                            isPresented: $isPickerPresented,
                             selection: $activitySelection
                         )
                     }
@@ -122,7 +122,7 @@ struct SessionView: View {
 
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(focusSessionViewModel.friends) { friend in
-                                FriendListItem(friend: friend)
+                                friendSelectionRow(friend)
                             }
                         }
                     }
@@ -148,7 +148,7 @@ struct SessionView: View {
                     
                     //local block apps button(move later)
                     Button {
-                        appBlockingModel.toggleFocusSession()
+                        toggleLocalFocusSession()
                     } label: {
                         Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
                             .frame(width: 360, height: 48)
@@ -161,7 +161,10 @@ struct SessionView: View {
                     //send request to a friend
                     Button {
                         Task {
-                            await focusSessionViewModel.sendFocusSessionRequest()
+                            await focusSessionViewModel.sendFocusSessionRequest(
+                                to: selectedFriend,
+                                durationMinutes: selectedDurationMinutes
+                            )
                         }
                     } label: {
                         Text("Send Request")
@@ -244,11 +247,10 @@ struct SessionView: View {
     }
 
     private func durationButton(minutes: Int) -> some View {
-        let isSelected = appBlockingModel.selectedDurationMinutes == minutes
+        let isSelected = selectedDurationMinutes == minutes
 
         return Button {
-            appBlockingModel.selectDuration(minutes: minutes)
-            focusSessionViewModel.selectDuration(minutes: minutes)
+            selectedDurationMinutes = minutes
         } label: {
             Text("\(minutes) min")
                 .font(.headline)
@@ -261,8 +263,8 @@ struct SessionView: View {
         }
     }
 
-    private func BlockedAppView(app: String) -> some View {
-        Text(app)
+    private func blockedSelectionBadge(_ summary: String) -> some View {
+        Text(summary)
             .font(.body)
             .fontWeight(.semibold)
             .lineLimit(1)
@@ -273,11 +275,11 @@ struct SessionView: View {
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 
-    private func FriendListItem(friend: Profile) -> some View {
-        let isFriendSelected = focusSessionViewModel.selectedFriend?.id == friend.id
+    private func friendSelectionRow(_ friend: Profile) -> some View {
+        let isFriendSelected = selectedFriend?.id == friend.id
 
         return Button {
-            focusSessionViewModel.selectFriend(friend)
+            selectedFriend = friend
         } label: {
             HStack {
                 Image(systemName: isFriendSelected ? "checkmark.circle.fill" : "person.crop.circle")
@@ -292,6 +294,16 @@ struct SessionView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private func toggleLocalFocusSession() {
+        if appBlockingModel.isBlocking {
+            appBlockingModel.stopFocusSession()
+        } else if let selectedDurationMinutes {
+            appBlockingModel.startFocusSession(durationMinutes: selectedDurationMinutes)
+        } else {
+            focusSessionViewModel.errorMessage = "Choose a duration first."
+        }
     }
 }
 

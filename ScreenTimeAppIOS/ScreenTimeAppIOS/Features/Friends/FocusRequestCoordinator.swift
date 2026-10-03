@@ -1,5 +1,5 @@
 //
-//  FocusSessionCoordinator.swift
+//  FocusRequestCoordinator.swift
 //  ScreenTimeAppIOS
 //
 
@@ -9,7 +9,7 @@ import OSLog
 
 @Observable
 @MainActor
-final class FocusSessionCoordinator {
+final class FocusRequestCoordinator {
     let appBlockingModel: AppBlockingModel
 
     private(set) var errorMessage: String?
@@ -19,7 +19,7 @@ final class FocusSessionCoordinator {
     @ObservationIgnored private var handledRequestIDs: Set<UUID> = []
     @ObservationIgnored private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "ScreenTimeAppIOS",
-        category: "FocusSessionCoordinator"
+        category: "FocusRequestCoordinator"
     )
 
     private static let initialRetryDelayNanoseconds: UInt64 = 1_000_000_000
@@ -123,9 +123,9 @@ final class FocusSessionCoordinator {
             return
         }
 
-        appBlockingModel.selectDuration(minutes: request.durationMinutes)
-
-        guard appBlockingModel.startFocusSession() else {
+        // The requester blocks their own saved selection. The approver controls
+        // only whether the request is accepted, not which apps are selected.
+        guard appBlockingModel.startFocusSession(durationMinutes: request.durationMinutes) else {
             logger.error("Blocking failed for accepted request \(request.id.uuidString, privacy: .public)")
             handledRequestIDs.remove(request.id)
             errorMessage = "A focus request was accepted, but app blocking could not start."

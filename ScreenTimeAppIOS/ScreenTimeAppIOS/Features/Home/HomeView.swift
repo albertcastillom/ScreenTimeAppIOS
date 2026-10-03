@@ -10,7 +10,7 @@ import FamilyControls
 
 struct HomeView: View {
     @Environment(AuthManager.self) private var authManager
-    @State private var focusSessionViewModel = FocusSessionViewModel()
+    @State private var focusSessionViewModel = FocusRequestsViewModel()
 
     var body: some View {
         ZStack {

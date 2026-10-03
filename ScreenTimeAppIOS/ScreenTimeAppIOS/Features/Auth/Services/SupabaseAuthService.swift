@@ -47,6 +47,6 @@ struct SupabaseAuthService {
     }
 }
 
-private struct DeleteAccountResponse: Decodable {
+nonisolated private struct DeleteAccountResponse: Decodable {
     let success: Bool
 }

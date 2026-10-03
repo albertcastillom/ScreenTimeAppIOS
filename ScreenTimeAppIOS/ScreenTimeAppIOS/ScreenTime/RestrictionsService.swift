@@ -10,11 +10,13 @@ import ManagedSettings
 import FamilyControls
 import DeviceActivity
 
-class RestrictionsService {
+final class RestrictionsService {
     private let store = ManagedSettingsStore(named: ScreenTimeIdentifiers.managedSettingsStoreName)
     private let center = DeviceActivityCenter()
     
-    func applyRestrictions(selection: FamilyActivitySelection) {
+    /// Applies shields immediately. The monitor extension is responsible only for
+    /// removing them when the scheduled interval ends.
+    private func applyRestrictions(selection: FamilyActivitySelection) {
         let applicationTokens = selection.applicationTokens
         let categoryTokens = selection.categoryTokens
         let webTokens = selection.webDomainTokens
@@ -24,14 +26,14 @@ class RestrictionsService {
         store.shield.webDomains = webTokens.isEmpty ? nil : webTokens
     }
     
-    func removeRestrictions() {
+    private func removeRestrictions() {
         store.shield.applications = nil
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil
     }
     
     @discardableResult
-    func startMonitoringSchedule(durationInMinutes: Int) -> Bool {
+    private func startMonitoringSchedule(durationInMinutes: Int) -> Bool {
         // Apple's DeviceActivity schedules require at least a 15-minute interval.
         guard durationInMinutes >= 15 else {
             print("Error: The minimum schedule interval allowed by Apple is 15 minutes.")
@@ -65,15 +67,15 @@ class RestrictionsService {
         }
     }
     
-    func stopMonitoring() {
+    private func stopMonitoring() {
         center.stopMonitoring([ScreenTimeIdentifiers.deviceActivityName])
     }
     
     @discardableResult
-    func activateRestrictions(selection: FamilyActivitySelection, minutes: Int) -> Bool {
+    func startBlocking(selection: FamilyActivitySelection, durationMinutes: Int) -> Bool {
         applyRestrictions(selection: selection)
 
-        guard startMonitoringSchedule(durationInMinutes: minutes) else {
+        guard startMonitoringSchedule(durationInMinutes: durationMinutes) else {
             removeRestrictions()
             return false
         }
@@ -81,7 +83,7 @@ class RestrictionsService {
         return true
     }
     
-    func deactivateRestrictions() {
+    func stopBlocking() {
         removeRestrictions()
         stopMonitoring()
     }

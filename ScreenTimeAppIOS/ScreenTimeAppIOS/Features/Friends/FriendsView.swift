@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FriendsView: View {
-    @State private var viewModel = FriendViewModel()
+    @State private var viewModel = FriendsViewModel()
     @State private var searchText = ""
     @State private var isShowingSearch = false
 

@@ -1,5 +1,5 @@
 //
-//  FocusSessionViewModel.swift
+//  FocusRequestsViewModel.swift
 //  ScreenTimeAppIOS
 //
 //  Created by Albert Castillo on 8/10/26.
@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 @MainActor
-final class FocusSessionViewModel {
+final class FocusRequestsViewModel {
     // MARK: - View State
 
     var friends: [Profile] = []
@@ -19,9 +19,6 @@ final class FocusSessionViewModel {
 
     var pendingRequestProfilesByID: [UUID: Profile] = [:]
     var sentRequestProfilesByID: [UUID: Profile] = [:]
-
-    var selectedFriend: Profile?
-    var selectedDurationMinutes: Int?
 
     var isLoading = false
     var errorMessage: String?
@@ -77,16 +74,6 @@ final class FocusSessionViewModel {
         isLoading = false
     }
 
-    // MARK: - Selection
-
-    func selectFriend(_ friend: Profile) {
-        selectedFriend = friend
-    }
-
-    func selectDuration(minutes: Int) {
-        selectedDurationMinutes = minutes
-    }
-
     // MARK: - Display Helpers
 
     func usernameForPendingFocusSessionRequest(_ request: FocusRequest) -> String {
@@ -99,21 +86,29 @@ final class FocusSessionViewModel {
 
     // MARK: - Send Requests
 
-    func sendFocusSessionRequest() async {
-        guard let selectedFriend else {
+    func sendFocusSessionRequest(to friend: Profile?, durationMinutes: Int?) async {
+        guard let friend else {
             errorMessage = "Choose a friend first."
             return
         }
 
-        guard let selectedDurationMinutes else {
+        guard let durationMinutes else {
             errorMessage = "Choose a duration first."
             return
         }
 
-        await sendFocusSessionRequest(selectedFriend.id, durationMinutes: selectedDurationMinutes)
+        await createFocusSessionRequest(
+            approverID: friend.id,
+            approverProfile: friend,
+            durationMinutes: durationMinutes
+        )
     }
 
-    func sendFocusSessionRequest(_ approverID: UUID, durationMinutes: Int) async {
+    private func createFocusSessionRequest(
+        approverID: UUID,
+        approverProfile: Profile,
+        durationMinutes: Int
+    ) async {
         errorMessage = nil
 
         do {
@@ -122,7 +117,7 @@ final class FocusSessionViewModel {
                 durationMinutes: durationMinutes
             )
             sentFocusSessions.append(request)
-            cacheSentProfileIfSelected(approverID: approverID)
+            sentRequestProfilesByID[approverID] = approverProfile
         } catch {
             errorMessage = "Failed to send focus request."
         }
@@ -178,12 +173,6 @@ final class FocusSessionViewModel {
         }
 
         return profilesByID
-    }
-
-    private func cacheSentProfileIfSelected(approverID: UUID) {
-        if let selectedFriend, selectedFriend.id == approverID {
-            sentRequestProfilesByID[approverID] = selectedFriend
-        }
     }
 
     private func removePendingProfileIfUnused(for requesterID: UUID) {

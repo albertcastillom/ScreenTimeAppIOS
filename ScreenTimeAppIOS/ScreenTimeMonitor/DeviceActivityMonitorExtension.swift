@@ -16,6 +16,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
    
     override func intervalDidStart(for activity: DeviceActivityName) {
         super.intervalDidStart(for: activity)
+        // The main app applies shields before registering the schedule, so the
+        // extension only needs to clean them up at the end.
     }
     
     override func intervalDidEnd(for activity: DeviceActivityName) {
@@ -25,6 +27,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             return
         }
 
+        // This extension runs even when the main app is suspended or terminated.
         store.shield.applications = nil
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil

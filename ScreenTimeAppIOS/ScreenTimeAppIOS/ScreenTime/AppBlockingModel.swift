@@ -12,14 +12,14 @@ import FamilyControls
 @Observable
 @MainActor
 final class AppBlockingModel {
+    /// The selection belongs to this device. Focus requests only carry a duration;
+    /// selected apps are never uploaded or shared with the approving friend.
     var activitySelection = FamilyActivitySelection() {
         didSet {
             stateStore.saveActivitySelection(activitySelection)
         }
     }
-    var isPickerPresented = false
     var isBlocking = false
-    var selectedDurationMinutes: Int?
     var sessionEndDate: Date?
 
     @ObservationIgnored private let restrictionsService: RestrictionsService
@@ -39,48 +39,33 @@ final class AppBlockingModel {
         refreshBlockingState()
     }
 
-    func presentAppPicker() {
-        isPickerPresented = true
-    }
-
     func updateActivitySelection(_ selection: FamilyActivitySelection) {
         activitySelection = selection
     }
 
-    func selectDuration(minutes: Int) {
-        selectedDurationMinutes = minutes
-    }
-
     @discardableResult
-    func startFocusSession() -> Bool {
-        guard hasSelectedApps else {
+    func startFocusSession(durationMinutes: Int) -> Bool {
+        // Do not let a second request replace the one shared schedule/store. It can
+        // remain accepted in Supabase and be retried after this session finishes.
+        guard !isBlocking, hasSelectedActivities else {
             return false
         }
 
-        guard let selectedDurationMinutes else {
+        guard restrictionsService.startBlocking(
+            selection: activitySelection,
+            durationMinutes: durationMinutes
+        ) else {
             return false
         }
 
-        guard restrictionsService.activateRestrictions(selection: activitySelection, minutes: selectedDurationMinutes) else {
-            return false
-        }
-
-        let endDate = Date().addingTimeInterval(TimeInterval(selectedDurationMinutes * 60))
-        saveBlockingState(isBlocking: true, sessionEndDate: endDate)
+        let endDate = Date().addingTimeInterval(TimeInterval(durationMinutes * 60))
+        updateBlockingState(isBlocking: true, sessionEndDate: endDate)
         return true
     }
 
     func stopFocusSession() {
-        restrictionsService.deactivateRestrictions()
-        saveBlockingState(isBlocking: false, sessionEndDate: nil)
-    }
-
-    func toggleFocusSession() {
-        if isBlocking {
-            stopFocusSession()
-        } else {
-            startFocusSession()
-        }
+        restrictionsService.stopBlocking()
+        updateBlockingState(isBlocking: false, sessionEndDate: nil)
     }
 
     func refreshBlockingState() {
@@ -107,13 +92,13 @@ final class AppBlockingModel {
         return summary
     }
 
-    private func saveBlockingState(isBlocking: Bool, sessionEndDate: Date?) {
+    private func updateBlockingState(isBlocking: Bool, sessionEndDate: Date?) {
         self.isBlocking = isBlocking
         self.sessionEndDate = sessionEndDate
         stateStore.saveBlockingState(isBlocking: isBlocking, sessionEndDate: sessionEndDate)
     }
 
-    private var hasSelectedApps: Bool {
+    private var hasSelectedActivities: Bool {
         !activitySelection.applicationTokens.isEmpty ||
         !activitySelection.categoryTokens.isEmpty ||
         !activitySelection.webDomainTokens.isEmpty

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var focusSessionCoordinator = FocusSessionCoordinator()
+    @State private var focusRequestCoordinator = FocusRequestCoordinator()
 
     var body: some View {
         TabView {
@@ -33,9 +33,11 @@ struct MainTabView: View {
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(.ultraThinMaterial, for: .tabBar)
         .task {
-            focusSessionCoordinator.start()
+            // One coordinator owns both the Realtime listener and the blocking
+            // model shared by every tab through the environment.
+            focusRequestCoordinator.start()
         }
-        .environment(focusSessionCoordinator.appBlockingModel)
+        .environment(focusRequestCoordinator.appBlockingModel)
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else {
                 return
@@ -43,13 +45,14 @@ struct MainTabView: View {
 
             // Reconcile immediately after foregrounding; Realtime sockets can be
             // suspended while the app is in the background.
-            focusSessionCoordinator.start()
+            focusRequestCoordinator.appBlockingModel.refreshBlockingState()
+            focusRequestCoordinator.start()
             Task {
-                await focusSessionCoordinator.reconcileAcceptedRequests()
+                await focusRequestCoordinator.reconcileAcceptedRequests()
             }
         }
         .onDisappear {
-            focusSessionCoordinator.stop()
+            focusRequestCoordinator.stop()
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  FriendViewModel.swift
+//  FriendsViewModel.swift
 //  ScreenTimeAppIOS
 //
 //  Created by Albert Castillo on 8/3/26.
@@ -10,7 +10,7 @@ import Observation
 
 @Observable
 @MainActor
-final class FriendViewModel {
+final class FriendsViewModel {
     // MARK: - View State
 
     var friends: [Profile] = []

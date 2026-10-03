@@ -10,7 +10,7 @@ import Supabase
 
 // MARK: - Profile Models
 
-struct Profile: Codable, Identifiable, Equatable {
+nonisolated struct Profile: Codable, Identifiable, Equatable {
     let id: UUID
     var username: String
     var createdAt: Date?
@@ -24,14 +24,14 @@ struct Profile: Codable, Identifiable, Equatable {
 
 // MARK: - Friendship Models
 
-enum FriendshipStatus: String, Codable {
+nonisolated enum FriendshipStatus: String, Codable {
     case pending
     case accepted
     case declined
     case blocked
 }
 
-struct Friendship: Codable, Identifiable, Equatable {
+nonisolated struct Friendship: Codable, Identifiable, Equatable {
     let id: UUID
     let requesterID: UUID
     let addresseeID: UUID
@@ -51,7 +51,7 @@ struct Friendship: Codable, Identifiable, Equatable {
 
 // MARK: - Focus Request Models
 
-enum FocusRequestStatus: String, Codable {
+nonisolated enum FocusRequestStatus: String, Codable {
     case pending
     case accepted
     case declined
@@ -61,7 +61,7 @@ enum FocusRequestStatus: String, Codable {
     case failed
 }
 
-struct FocusRequest: Codable, Identifiable, Equatable {
+nonisolated struct FocusRequest: Codable, Identifiable, Equatable {
     let id: UUID
     let requesterID: UUID
     let approverID: UUID
@@ -328,14 +328,13 @@ struct SupabaseService {
             .value
     }
 
-    // MARK: Focus Requests - Realtime
+    // MARK: Focus Requests - realtime
 
     func acceptedFocusRequestUpdates() async throws -> AsyncThrowingStream<FocusRequest, Error> {
         let requesterID = try await currentUserID()
         let topic = "focus_requests:\(requesterID.uuidString.lowercased())"
         let channel = client.realtimeV2.channel(topic) {
-            // Database broadcasts are private and realtime.messages RLS only allows
-            // this authenticated requester to read their own topic.
+            // Database broadcasts are private and realtime messages
             $0.isPrivate = true
         }
         let updates = channel.broadcastStream(event: "UPDATE")
@@ -389,7 +388,7 @@ struct SupabaseService {
 
 // MARK: - Request Payloads
 
-private struct ProfileUpdatePayload: Encodable {
+nonisolated private struct ProfileUpdatePayload: Encodable {
     let username: String?
 
     enum CodingKeys: String, CodingKey {
@@ -397,7 +396,7 @@ private struct ProfileUpdatePayload: Encodable {
     }
 }
 
-private struct FriendshipInsertPayload: Encodable {
+nonisolated private struct FriendshipInsertPayload: Encodable {
     let requesterID: UUID
     let addresseeID: UUID
     let status: FriendshipStatus
@@ -409,7 +408,7 @@ private struct FriendshipInsertPayload: Encodable {
     }
 }
 
-private struct FriendshipStatusUpdatePayload: Encodable {
+nonisolated private struct FriendshipStatusUpdatePayload: Encodable {
     let status: FriendshipStatus
 
     enum CodingKeys: String, CodingKey {
@@ -417,7 +416,7 @@ private struct FriendshipStatusUpdatePayload: Encodable {
     }
 }
 
-private struct FocusRequestInsertPayload: Encodable {
+nonisolated private struct FocusRequestInsertPayload: Encodable {
     let requesterID: UUID
     let approverID: UUID
     let durationMinutes: Int
@@ -431,7 +430,7 @@ private struct FocusRequestInsertPayload: Encodable {
     }
 }
 
-private struct FocusRequestRPCPayload: Encodable {
+nonisolated private struct FocusRequestRPCPayload: Encodable {
     let requestID: UUID
 
     enum CodingKeys: String, CodingKey {
@@ -441,7 +440,7 @@ private struct FocusRequestRPCPayload: Encodable {
 
 // MARK: - Realtime Payloads
 
-private struct FocusRequestRealtimeRecord: Decodable {
+nonisolated private struct FocusRequestRealtimeRecord: Decodable {
     let id: UUID
     let requesterID: UUID
     let approverID: UUID
@@ -471,6 +470,6 @@ private struct FocusRequestRealtimeRecord: Decodable {
     }
 }
 
-private struct FocusRequestBroadcastPayload: Decodable {
+nonisolated private struct FocusRequestBroadcastPayload: Decodable {
     let record: FocusRequestRealtimeRecord
 }
