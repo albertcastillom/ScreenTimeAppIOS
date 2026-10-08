@@ -11,8 +11,17 @@ import FamilyControls
 struct HomeView: View {
     @Environment(AuthManager.self) private var authManager
     @State private var focusSessionViewModel = FocusRequestsViewModel()
+    @Environment(AppBlockingModel.self) private var appBlockingModel
+    @State private var activitySelection = FamilyActivitySelection()
+    @State private var isPickerPresented = false
+    
+    
+    private let blockedAppColumns = [
+        GridItem(.adaptive(minimum: 105), spacing: 10)
+    ]
 
     var body: some View {
+        @Bindable var appBlockingModel = appBlockingModel
         ZStack {
             Color("Background")
                 .ignoresSafeArea()
@@ -37,6 +46,19 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top)
+                    
+                    //if focus sessions requests are not empty show them
+                    if focusSessionViewModel.hasPendingFocusSessions {
+                        incomingFocusRequestsCard
+                    }
+
+                    if let errorMessage = focusSessionViewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                    }
                     
                     //focus session card
                     VStack(alignment: .leading, spacing: 12) {
@@ -63,19 +85,51 @@ struct HomeView: View {
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
                     
-                    //if focus sessions requests are not empty show them
-                    if focusSessionViewModel.hasPendingFocusSessions {
-                        incomingFocusRequestsCard
-                    }
+                    //Block apps selection card
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("What Gets Blocked")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(Constants.primaryTextColor)
 
-                    if let errorMessage = focusSessionViewModel.errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
+                        if appBlockingModel.blockedSelectionSummary.isEmpty {
+                            Text("No apps selected")
+                                .font(.body)
+                                .foregroundStyle(Constants.secondaryTextColor)
+                        } else {
+                            LazyVGrid(
+                                columns: blockedAppColumns,
+                                alignment: .leading,
+                                spacing: 10
+                            ) {
+                                ForEach(appBlockingModel.blockedSelectionSummary, id: \.self) { item in
+                                    blockedSelectionBadge(item)
+                                }
+                            }
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
+                        }
+
+                        Button {
+                            isPickerPresented = true
+                        } label: {
+                            Text("Choose Apps to Block")
+                                .frame(maxWidth: .infinity, minHeight: 48)
+                                .font(.headline)
+                                .background(.buttonBackground)
+                                .foregroundColor(.buttonForeground)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .familyActivityPicker(
+                            isPresented: $isPickerPresented,
+                            selection: $appBlockingModel.activitySelection
+                        )
                     }
-                    
+                    .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Constants.backgroundSecondaryColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .padding(.horizontal)
 
                     Spacer(minLength: 0)
                 }
@@ -83,6 +137,13 @@ struct HomeView: View {
         }
         .task {
             await focusSessionViewModel.loadFocusSessionScreen()
+        }
+        .onAppear {
+            appBlockingModel.refreshBlockingState()
+            activitySelection = appBlockingModel.activitySelection
+        }
+        .onChange(of: activitySelection) { _, newSelection in
+            appBlockingModel.updateActivitySelection(newSelection)
         }
     }
 
@@ -158,9 +219,22 @@ struct HomeView: View {
     }
 }
 
+private func blockedSelectionBadge(_ summary: String) -> some View {
+    Text(summary)
+        .font(.body)
+        .fontWeight(.semibold)
+        .lineLimit(1)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(Constants.secondaryTextColor)
+        .foregroundColor(Constants.buttonForeColor)
+        .clipShape(Capsule())
+}
+
 #Preview {
     NavigationStack {
         HomeView()
-            .environment(AuthManager(service: SupabaseAuthService()))
     }
+    .environment(AuthManager(service: SupabaseAuthService()))
+    .environment(AppBlockingModel())
 }

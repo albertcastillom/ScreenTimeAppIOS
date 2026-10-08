@@ -15,20 +15,14 @@ struct SessionView: View {
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    private let blockedAppColumns = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-    ]
     private let durations = [15, 25, 30, 45, 60, 90]
     
     //state vars
     @Environment(AppBlockingModel.self) private var appBlockingModel
     @State private var focusSessionViewModel = FocusRequestsViewModel()
-    @State private var activitySelection = FamilyActivitySelection()
-    @State private var isPickerPresented = false
     @State private var selectedFriend: Profile?
     @State private var selectedDurationMinutes: Int?
+    
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
 
@@ -60,47 +54,6 @@ struct SessionView: View {
                                 durationButton(minutes: minutes)
                             }
                         }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.backgroundSecondaryColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    .padding(.horizontal)
-                    
-                    //Block apps selection carc
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What Gets Blocked")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Constants.primaryTextColor)
-
-                        if appBlockingModel.blockedSelectionSummary.isEmpty {
-                            Text("No apps selected")
-                                .font(.body)
-                                .foregroundStyle(Constants.secondaryTextColor)
-                        } else {
-                            LazyVGrid(columns: blockedAppColumns, spacing: 5) {
-                                ForEach(appBlockingModel.blockedSelectionSummary, id: \.self) { item in
-                                    blockedSelectionBadge(item)
-                                }
-                            }
-                        }
-
-                        Button {
-                            isPickerPresented = true
-                        } label: {
-                            Text("Choose Apps to Block")
-                                .frame(width: 325, height: 48)
-                                .font(.headline)
-                                .background(.buttonBackground)
-                                .foregroundColor(.buttonForeground)
-                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        }
-                        .familyActivityPicker(
-                            isPresented: $isPickerPresented,
-                            selection: $activitySelection
-                        )
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -179,13 +132,6 @@ struct SessionView: View {
                 }
             }
         }
-        .onAppear {
-            appBlockingModel.refreshBlockingState()
-            activitySelection = appBlockingModel.activitySelection
-        }
-        .onChange(of: activitySelection) { _, newSelection in
-            appBlockingModel.updateActivitySelection(newSelection)
-        }
         .task {
             await focusSessionViewModel.loadFocusSessionScreen()
         }
@@ -263,18 +209,6 @@ struct SessionView: View {
         }
     }
 
-    private func blockedSelectionBadge(_ summary: String) -> some View {
-        Text(summary)
-            .font(.body)
-            .fontWeight(.semibold)
-            .lineLimit(1)
-            .minimumScaleFactor(0.5)
-            .frame(width: 90, height: 25)
-            .background(Constants.secondaryTextColor)
-            .foregroundColor(Constants.buttonForeColor)
-            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-    }
-
     private func friendSelectionRow(_ friend: Profile) -> some View {
         let isFriendSelected = selectedFriend?.id == friend.id
 
@@ -310,4 +244,5 @@ struct SessionView: View {
 #Preview {
     SessionView()
         .environment(AppBlockingModel())
+        .environment(AuthManager(service: SupabaseAuthService()))
 }
