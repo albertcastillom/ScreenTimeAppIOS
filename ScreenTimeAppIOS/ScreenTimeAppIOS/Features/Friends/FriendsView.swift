@@ -56,9 +56,11 @@ struct FriendsView: View {
                    isShowingSearch.toggle()
                }
                .padding()
+               .frame(maxWidth: .infinity, minHeight: 48)
                .background(.buttonBackground)
                .foregroundColor(.buttonForeground)
                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+               .padding(.horizontal)
                
                Spacer()
            }
@@ -114,6 +116,7 @@ struct FriendsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
+        .padding(.bottom)
     }
 
     private var searchCard: some View {
@@ -123,7 +126,7 @@ struct FriendsView: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .padding(12)
-                    .background(Color("Background"))
+                    .background(Constants.backgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .onSubmit {
                         Task {
@@ -138,9 +141,10 @@ struct FriendsView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
                 .background(.buttonBackground)
                 .foregroundColor(.buttonForeground)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                 ForEach(viewModel.searchResults) { profile in
                     searchResultRow(profile)

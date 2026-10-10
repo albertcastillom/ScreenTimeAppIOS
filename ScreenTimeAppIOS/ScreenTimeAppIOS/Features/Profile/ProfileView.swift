@@ -66,10 +66,14 @@ struct ProfileView: View {
                 
                 //Privacy Policy
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Privacy Policy")
-                        .font(.body)
+                    Text("About")
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(Color(Constants.primaryTextColor))
+                    Text("Privacy Policy")
+                        .foregroundStyle(Constants.primaryTextColor)
+                        .font(.body)
+                        .fontWeight(.semibold)
                     
                     Text("Terms of Service")
                         .foregroundStyle(Constants.secondaryTextColor)
@@ -90,12 +94,14 @@ struct ProfileView: View {
                     }
                 } label: {
                     Text("Sign Out")
-                        .frame(width: 360, height: 48)
-                        .font(.headline)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .frame(maxWidth: .infinity)
                 }
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .font(.headline)
+                .background(.buttonBackground)
+                .foregroundColor(.buttonForeground)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal)
                 
                 //Delete account
                 Button(role: .destructive) {
@@ -111,6 +117,7 @@ struct ProfileView: View {
                 }
                 .disabled(authManager.isDeletingAccount)
                 .padding()
+                .frame(maxWidth: .infinity, minHeight: 48)
                 .background(Color.red.opacity(0.12))
                 .foregroundStyle(.red)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))

@@ -15,10 +15,7 @@ struct HomeView: View {
     @State private var activitySelection = FamilyActivitySelection()
     @State private var isPickerPresented = false
     
-    
-    private let blockedAppColumns = [
-        GridItem(.adaptive(minimum: 105), spacing: 10)
-    ]
+
 
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
@@ -97,17 +94,14 @@ struct HomeView: View {
                                 .font(.body)
                                 .foregroundStyle(Constants.secondaryTextColor)
                         } else {
-                            LazyVGrid(
-                                columns: blockedAppColumns,
-                                alignment: .leading,
-                                spacing: 10
-                            ) {
+                            HStack{
                                 ForEach(appBlockingModel.blockedSelectionSummary, id: \.self) { item in
                                     blockedSelectionBadge(item)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                            
 
                         Button {
                             isPickerPresented = true
@@ -219,17 +213,17 @@ struct HomeView: View {
     }
 }
 
-private func blockedSelectionBadge(_ summary: String) -> some View {
-    Text(summary)
-        .font(.body)
-        .fontWeight(.semibold)
-        .lineLimit(1)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Constants.secondaryTextColor)
-        .foregroundColor(Constants.buttonForeColor)
-        .clipShape(Capsule())
-}
+    private func blockedSelectionBadge(_ summary: String) -> some View {
+        Text(summary)
+            .font(.body)
+            .fontWeight(.semibold)
+            .lineLimit(1)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(Constants.secondaryTextColor)
+            .foregroundColor(Constants.buttonForeColor)
+            .clipShape(Capsule())
+    }
 
 #Preview {
     NavigationStack {
