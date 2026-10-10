@@ -92,13 +92,12 @@ The app expects these backend resources:
 - A private Realtime Broadcast policy for requester-scoped focus-request updates
 - The authenticated `delete-account` Edge Function with access to a server-side secret or service-role key
 
-The checked-in migration currently captures the accepted-request Broadcast behavior and related policy hardening, but it is incremental: the repository does **not yet contain a complete baseline migration** for creating all tables, policies, triggers, and RPCs from an empty Supabase project. Until that baseline is added, a fresh backend cannot be reproduced from this repository alone.
+The checked-in `initial_remote_schema` migration is a complete baseline pulled from the linked Supabase project. It creates the app's tables, types, constraints, indexes, policies, grants, functions, triggers, and Realtime configuration from an empty database.
 
 For the migration and deployment workflow, see [`supabase/README.md`](supabase/README.md).
 
 ## Known gaps and next steps
 
-- Add a complete baseline Supabase schema migration.
 - Replace the mock leaderboard and profile statistics with real session data.
 - Implement profile editing, notification preferences, and legal-document navigation.
 - Add the optional todo/note support described in the home-screen copy.

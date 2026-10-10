@@ -21,7 +21,7 @@ local Supabase state.
 
 ## Focus-request lifecycle
 
-`20260818215044_focus_request_broadcast.sql` documents the production behavior:
+The `initial_remote_schema` baseline includes the complete focus-request lifecycle:
 
 - Accepting a pending request sets `status = accepted` and `responded_at` through
   the approver RPC. It does not set activation timestamps.
