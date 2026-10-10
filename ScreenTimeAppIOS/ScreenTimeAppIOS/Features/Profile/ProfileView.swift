@@ -30,13 +30,14 @@ struct ProfileView: View {
                 profileCard
                 
                 //Stats card
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     statCard(value: "20", title: "Sessions")
                     statCard(value: "3d", title: "Streak")
                     statCard(value: "\(viewModel.friendsCount)", title: "Friends")
                     statCard(value: "#4", title: "Rank")
                 }
                 .padding(.horizontal)
+                
                 
                 // Notification card
                 VStack(alignment: .leading, spacing: 12) {
@@ -250,8 +251,8 @@ struct ProfileView: View {
                 .minimumScaleFactor(0.6)
         }
         .padding(12)
-        .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: .infinity)
         .background(Constants.backgroundSecondaryColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)

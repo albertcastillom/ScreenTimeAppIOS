@@ -194,7 +194,7 @@ struct SessionView: View {
 
     private func durationButton(minutes: Int) -> some View {
         let isSelected = selectedDurationMinutes == minutes
-
+        
         return Button {
             selectedDurationMinutes = minutes
         } label: {
@@ -203,7 +203,7 @@ struct SessionView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .background(isSelected ? Constants.buttonForeColor : Constants.buttonBackColor)
+                .background(isSelected ? Constants.backgroundSecondaryColor : Constants.buttonBackColor)
                 .foregroundColor(isSelected ? Constants.buttonBackColor : Constants.buttonForeColor)
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
         }
