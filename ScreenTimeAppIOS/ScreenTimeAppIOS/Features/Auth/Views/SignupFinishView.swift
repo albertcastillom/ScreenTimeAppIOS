@@ -24,7 +24,7 @@ struct SignupFinishView: View {
     
     var body: some View {
         ZStack {
-            Color("Background").ignoresSafeArea()
+            Constants.appBackgroundColor.ignoresSafeArea()
             
             VStack {
                 
@@ -33,27 +33,28 @@ struct SignupFinishView: View {
                 Text("Finish Signing Up")
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundStyle(Constants.primaryTextColor)
                 Text("Please fill out the fields")
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Constants.secondaryTextColor)
                 TextField("Enter your email", text: $email)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Constants.inputBackgroundColor)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
                 
                 TextField("Enter your username", text: $username)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Constants.inputBackgroundColor)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
                 ZStack(alignment: .trailing){
                     SecureField("Enter your Password", text: $password)
                         .font(.subheadline)
                         .padding(12)
-                        .background(Color(.secondarySystemBackground))
+                        .background(Constants.inputBackgroundColor)
                         .cornerRadius(10)
                     
                     if !password.isEmpty && !confirmedPassword.isEmpty {
@@ -68,7 +69,7 @@ struct SignupFinishView: View {
                     SecureField("Confirm your password", text: $confirmedPassword)
                         .font(.subheadline)
                         .padding(12)
-                        .background(Color(.secondarySystemBackground))
+                        .background(Constants.inputBackgroundColor)
                         .cornerRadius(10)
                     
                     if !password.isEmpty && !confirmedPassword.isEmpty {
@@ -88,8 +89,8 @@ struct SignupFinishView: View {
                     Text("Sign Up")
                         .frame(width: 360, height: 48)
                         .font(.headline)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
+                        .background(Constants.buttonBackgroundColor)
+                        .foregroundStyle(Constants.buttonForegroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .padding(.vertical)

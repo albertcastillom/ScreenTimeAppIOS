@@ -20,7 +20,7 @@ struct HomeView: View {
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
         ZStack {
-            Color("Background")
+            Constants.appBackgroundColor
                 .ignoresSafeArea()
 
             ScrollView {
@@ -30,7 +30,7 @@ struct HomeView: View {
                         Text("Home")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundStyle(Color("PrimaryText"))
+                            .foregroundStyle(Constants.primaryTextColor)
 
                         Spacer()
 
@@ -62,22 +62,22 @@ struct HomeView: View {
                         Text("Start a focus Session")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(Color("PrimaryText"))
+                            .foregroundStyle(Constants.textOnYellowColor)
 
                         Text("Send a session request to a friend or family member. Add an optional todo list or note to help you stay focused.")
                             .font(.body)
-                            .foregroundStyle(Color("SecondaryText"))
+                            .foregroundStyle(Constants.textOnYellowColor)
                             .lineLimit(3)
 
                         NavigationLink(destination: SessionView()) {
                             Image(systemName: "play.circle.fill")
                                 .font(.title)
-                                .foregroundStyle(Color("PrimaryText"))
+                                .foregroundStyle(Constants.textOnYellowColor)
                         }
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color("BackgroundSecondary"))
+                    .background(Constants.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
@@ -87,12 +87,12 @@ struct HomeView: View {
                         Text("What Gets Blocked")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(Constants.primaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
 
                         if appBlockingModel.blockedSelectionSummary.isEmpty {
                             Text("No apps selected")
                                 .font(.body)
-                                .foregroundStyle(Constants.secondaryTextColor)
+                                .foregroundStyle(Constants.textOnYellowColor)
                         } else {
                             HStack{
                                 ForEach(appBlockingModel.blockedSelectionSummary, id: \.self) { item in
@@ -109,8 +109,8 @@ struct HomeView: View {
                             Text("Choose Apps to Block")
                                 .frame(maxWidth: .infinity, minHeight: 48)
                                 .font(.headline)
-                                .background(.buttonBackground)
-                                .foregroundColor(.buttonForeground)
+                                .background(Constants.cardButtonBackgroundColor)
+                                .foregroundStyle(Constants.cardButtonForegroundColor)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                         .familyActivityPicker(
@@ -120,7 +120,7 @@ struct HomeView: View {
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.backgroundSecondaryColor)
+                    .background(Constants.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
@@ -146,7 +146,7 @@ struct HomeView: View {
             Text("Focus Requests")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
 
             ForEach(focusSessionViewModel.pendingFocusSessions) { request in
                 incomingFocusRequestRow(request)
@@ -154,7 +154,7 @@ struct HomeView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("BackgroundSecondary"))
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -167,16 +167,16 @@ struct HomeView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(focusSessionViewModel.usernameForPendingFocusSessionRequest(request))
                         .font(.headline)
-                        .foregroundStyle(Constants.primaryTextColor)
+                        .foregroundStyle(Constants.textOnYellowColor)
 
                     Text("\(request.durationMinutes) min • Pending")
                         .font(.subheadline)
-                        .foregroundStyle(Constants.secondaryTextColor)
+                        .foregroundStyle(Constants.textOnYellowColor)
                 }
 
                 Spacer()
@@ -191,8 +191,8 @@ struct HomeView: View {
                     Text("Decline")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: 40)
-                        .background(Constants.buttonBackColor)
-                        .foregroundColor(Constants.buttonForeColor)
+                        .background(Constants.cardButtonBackgroundColor)
+                        .foregroundStyle(Constants.cardButtonForegroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
 
@@ -204,8 +204,8 @@ struct HomeView: View {
                     Text("Accept")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: 40)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
+                        .background(Constants.cardButtonBackgroundColor)
+                        .foregroundStyle(Constants.cardButtonForegroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
@@ -220,8 +220,8 @@ struct HomeView: View {
             .lineLimit(1)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(Constants.secondaryTextColor)
-            .foregroundColor(Constants.buttonForeColor)
+            .background(Constants.cardButtonBackgroundColor)
+            .foregroundStyle(Constants.cardButtonForegroundColor)
             .clipShape(Capsule())
     }
 

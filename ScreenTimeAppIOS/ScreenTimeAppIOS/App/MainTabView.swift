@@ -29,7 +29,7 @@ struct MainTabView: View {
                 }
             }
         }
-        .tint(Constants.primaryTextColor)
+        .tint(Constants.accentColor)
         .toolbarBackground(.visible, for: .tabBar)
         .toolbarBackground(.ultraThinMaterial, for: .tabBar)
         .task {

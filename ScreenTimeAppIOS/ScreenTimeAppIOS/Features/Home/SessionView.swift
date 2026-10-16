@@ -27,7 +27,7 @@ struct SessionView: View {
         @Bindable var appBlockingModel = appBlockingModel
 
         ZStack {
-            Color("Background").ignoresSafeArea(edges: .all)
+            Constants.appBackgroundColor.ignoresSafeArea(edges: .all)
 
             ScrollView {
                 VStack {
@@ -36,7 +36,7 @@ struct SessionView: View {
                         Text("Start Focus Session")
                             .font(.title)
                             .bold()
-                            .foregroundColor(Constants.primaryTextColor)
+                            .foregroundStyle(Constants.primaryTextColor)
                             .padding()
 
                         Spacer()
@@ -47,7 +47,7 @@ struct SessionView: View {
                         Text("Duration")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(Constants.primaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
 
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(durations, id: \.self) { minutes in
@@ -57,7 +57,7 @@ struct SessionView: View {
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.backgroundSecondaryColor)
+                    .background(Constants.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
@@ -67,10 +67,10 @@ struct SessionView: View {
                         Text("Choose a friend to notify")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(Constants.primaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
 
                         Text("They'll get a request to start a session with you")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
                             .fontWeight(.semibold)
 
                         VStack(alignment: .leading, spacing: 12) {
@@ -81,7 +81,7 @@ struct SessionView: View {
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.backgroundSecondaryColor)
+                    .background(Constants.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
@@ -106,8 +106,8 @@ struct SessionView: View {
                         Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
                             .frame(width: 360, height: 48)
                             .font(.headline)
-                            .background(.buttonBackground)
-                            .foregroundColor(.buttonForeground)
+                            .background(Constants.buttonBackgroundColor)
+                            .foregroundStyle(Constants.buttonForegroundColor)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
                     
@@ -123,8 +123,8 @@ struct SessionView: View {
                         Text("Send Request")
                             .frame(width: 360, height: 48)
                             .font(.headline)
-                            .background(.buttonBackground)
-                            .foregroundColor(.buttonForeground)
+                            .background(Constants.buttonBackgroundColor)
+                            .foregroundStyle(Constants.buttonForegroundColor)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
 
@@ -142,7 +142,7 @@ struct SessionView: View {
             Text("Pending Approval")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(Constants.primaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
 
             ForEach(focusSessionViewModel.sentFocusSessions) { request in
                 sentFocusRequestRow(request)
@@ -150,7 +150,7 @@ struct SessionView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Constants.backgroundSecondaryColor)
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -162,16 +162,16 @@ struct SessionView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 30, height: 30)
-                .foregroundStyle(Constants.primaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(focusSessionViewModel.usernameForSentFocusSessionRequest(request))
                     .font(.headline)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
 
                 Text("\(request.durationMinutes) min • \(request.status.rawValue.capitalized)")
                     .font(.subheadline)
-                    .foregroundStyle(Constants.secondaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
             }
 
             Spacer()
@@ -185,8 +185,8 @@ struct SessionView: View {
                     .font(.subheadline.weight(.semibold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Constants.buttonBackColor)
-                    .foregroundColor(Constants.buttonForeColor)
+                    .background(Constants.cardButtonBackgroundColor)
+                    .foregroundStyle(Constants.cardButtonForegroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
@@ -203,8 +203,8 @@ struct SessionView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .background(isSelected ? Constants.backgroundSecondaryColor : Constants.buttonBackColor)
-                .foregroundColor(isSelected ? Constants.buttonBackColor : Constants.buttonForeColor)
+                .background(isSelected ? Constants.cardBackgroundColor : Constants.cardButtonBackgroundColor)
+                .foregroundStyle(isSelected ? Constants.textOnYellowColor : Constants.cardButtonForegroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
         }
     }
@@ -219,10 +219,10 @@ struct SessionView: View {
                 Image(systemName: isFriendSelected ? "checkmark.circle.fill" : "person.crop.circle")
                     .resizable()
                     .frame(width: 30, height: 30)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
 
                 Text(friend.username)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
 
                 Spacer()
             }

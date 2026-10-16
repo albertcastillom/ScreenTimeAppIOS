@@ -14,7 +14,7 @@ struct FriendsView: View {
 
     var body: some View {
        ZStack {
-           Color("Background")
+           Constants.appBackgroundColor
                .ignoresSafeArea()
            
            VStack {
@@ -23,7 +23,7 @@ struct FriendsView: View {
                    Text("Friends")
                        .font(.largeTitle)
                        .fontWeight(.bold)
-                       .foregroundStyle(Color("PrimaryText"))
+                       .foregroundStyle(Constants.primaryTextColor)
 
                    Spacer()
                }
@@ -39,7 +39,7 @@ struct FriendsView: View {
                if let errorMessage = viewModel.errorMessage {
                    Text(errorMessage)
                        .font(.body)
-                       .foregroundStyle(Color("SecondaryText"))
+                       .foregroundStyle(Constants.secondaryTextColor)
                        .padding(.horizontal)
                }
                
@@ -57,8 +57,8 @@ struct FriendsView: View {
                }
                .padding()
                .frame(maxWidth: .infinity, minHeight: 48)
-               .background(.buttonBackground)
-               .foregroundColor(.buttonForeground)
+               .background(Constants.buttonBackgroundColor)
+               .foregroundStyle(Constants.buttonForegroundColor)
                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                .padding(.horizontal)
                
@@ -75,11 +75,11 @@ struct FriendsView: View {
             Text("Pending Requests")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
 
             if viewModel.pendingRequests.isEmpty {
                 Text("No pending requests")
-                    .foregroundStyle(Color("SecondaryText"))
+                    .foregroundStyle(Constants.textOnYellowColor)
             } else {
                 ForEach(viewModel.pendingRequests) { request in
                     pendingRequestRow(request)
@@ -88,7 +88,7 @@ struct FriendsView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("BackgroundSecondary"))
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -99,11 +99,11 @@ struct FriendsView: View {
             Text("Friends: \(viewModel.friendsCount)")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
 
             if viewModel.friends.isEmpty {
                 Text("No friends yet")
-                    .foregroundStyle(Color("SecondaryText"))
+                    .foregroundStyle(Constants.textOnYellowColor)
             } else {
                 ForEach(viewModel.friends) { friend in
                     friendRow(friend)
@@ -112,7 +112,7 @@ struct FriendsView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("BackgroundSecondary"))
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -126,7 +126,7 @@ struct FriendsView: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .padding(12)
-                    .background(Constants.backgroundColor)
+                    .background(Constants.inputBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .onSubmit {
                         Task {
@@ -142,8 +142,8 @@ struct FriendsView: View {
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
-                .background(.buttonBackground)
-                .foregroundColor(.buttonForeground)
+                .background(Constants.cardButtonBackgroundColor)
+                .foregroundStyle(Constants.cardButtonForegroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                 ForEach(viewModel.searchResults) { profile in
@@ -153,7 +153,7 @@ struct FriendsView: View {
         }
         .padding(isShowingSearch ? 20 : 0)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(isShowingSearch ? Color("BackgroundSecondary") : Color.clear)
+        .background(isShowingSearch ? Constants.cardBackgroundColor : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: isShowingSearch ? Color.black.opacity(0.1) : Color.clear, radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -162,7 +162,7 @@ struct FriendsView: View {
     private func friendRow(_ friend: Profile) -> some View {
         HStack {
             Text(friend.username)
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
             Spacer()
             Button("Remove") {
                 Task {
@@ -170,32 +170,34 @@ struct FriendsView: View {
                 }
             }
             .font(.caption)
-            .foregroundStyle(Color("SecondaryText"))
+            .foregroundStyle(Constants.textOnYellowColor)
         }
     }
 
     private func pendingRequestRow(_ request: Friendship) -> some View {
         HStack {
             Text(viewModel.usernameForPendingRequest(request))
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
             Spacer()
             Button("Accept") {
                 Task {
                     await viewModel.acceptFriendRequest(request)
                 }
             }
+            .foregroundStyle(Constants.textOnYellowColor)
             Button("Decline") {
                 Task {
                     await viewModel.rejectFriendRequest(request)
                 }
             }
+            .foregroundStyle(Constants.textOnYellowColor)
         }
     }
 
     private func searchResultRow(_ profile: Profile) -> some View {
         HStack {
             Text(profile.username)
-                .foregroundStyle(Color("PrimaryText"))
+                .foregroundStyle(Constants.textOnYellowColor)
             Spacer()
             Button("Add") {
                 Task {
@@ -203,7 +205,7 @@ struct FriendsView: View {
                     await viewModel.sendFriendRequest(to: profile)
                 }
             }
-            .foregroundStyle(Color("SecondaryText"))
+            .foregroundStyle(Constants.textOnYellowColor)
         }
     }
 }

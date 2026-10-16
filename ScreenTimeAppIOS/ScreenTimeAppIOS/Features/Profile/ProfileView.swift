@@ -14,7 +14,7 @@ struct ProfileView: View {
 
     var body: some View {
         ZStack {
-            Constants.backgroundColor.ignoresSafeArea(edges: .all)
+            Constants.appBackgroundColor.ignoresSafeArea(edges: .all)
             VStack {
                 HStack {
                     Text("Profile")
@@ -44,23 +44,25 @@ struct ProfileView: View {
                     Text("Notifications")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color(Constants.primaryTextColor))
+                        .foregroundStyle(Constants.textOnYellowColor)
                     HStack {
                         Text("Push Notifications")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
                         Toggle("", isOn: .constant(true))
                             .toggleStyle(SwitchToggleStyle())
+                            .tint(Constants.cardButtonBackgroundColor)
                     }
                     HStack {
                         Text("Friend Requests")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.textOnYellowColor)
                         Toggle("", isOn: .constant(true))
                             .toggleStyle(SwitchToggleStyle())
+                            .tint(Constants.cardButtonBackgroundColor)
                     }
                 }
                 .padding(20)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BackgroundSecondary"))
+                .background(Constants.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .padding(.horizontal)
@@ -70,20 +72,20 @@ struct ProfileView: View {
                     Text("About")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color(Constants.primaryTextColor))
+                        .foregroundStyle(Constants.textOnYellowColor)
                     Text("Privacy Policy")
-                        .foregroundStyle(Constants.primaryTextColor)
+                        .foregroundStyle(Constants.textOnYellowColor)
                         .font(.body)
                         .fontWeight(.semibold)
                     
                     Text("Terms of Service")
-                        .foregroundStyle(Constants.secondaryTextColor)
+                        .foregroundStyle(Constants.textOnYellowColor)
                         .font(.body)
                         .fontWeight(.semibold)
                 }
                 .padding(20)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BackgroundSecondary"))
+                .background(Constants.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 .padding(.horizontal)
@@ -99,8 +101,8 @@ struct ProfileView: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: 48)
                 .font(.headline)
-                .background(.buttonBackground)
-                .foregroundColor(.buttonForeground)
+                .background(Constants.buttonBackgroundColor)
+                .foregroundStyle(Constants.buttonForegroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .padding(.horizontal)
                 
@@ -170,7 +172,7 @@ struct ProfileView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Constants.backgroundSecondaryColor)
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
@@ -181,17 +183,17 @@ struct ProfileView: View {
             Image(systemName: "person.crop.circle")
                 .resizable()
                 .frame(width: 50, height: 50)
-                .foregroundStyle(Constants.primaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(profile.username)
                     .font(.body)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.secondaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
                 
                 Text(memberSinceText(for: profile.createdAt))
                     .font(.body)
-                    .foregroundStyle(Constants.secondaryTextColor)
+                    .foregroundStyle(Constants.textOnYellowColor)
             }
             Spacer()
                 
@@ -199,8 +201,8 @@ struct ProfileView: View {
                 print("edit Profile")
             }
             .padding()
-            .background(.buttonBackground)
-            .foregroundColor(.buttonForeground)
+            .background(Constants.cardButtonBackgroundColor)
+            .foregroundStyle(Constants.cardButtonForegroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
         }
     }
@@ -210,7 +212,7 @@ struct ProfileView: View {
             Text(viewModel.errorMessage ?? "Profile unavailable")
                 .font(.body)
                 .fontWeight(.semibold)
-                .foregroundStyle(Constants.secondaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
 
             Button("Retry") {
                 Task {
@@ -219,8 +221,8 @@ struct ProfileView: View {
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(.buttonBackground)
-            .foregroundColor(.buttonForeground)
+            .background(Constants.cardButtonBackgroundColor)
+            .foregroundStyle(Constants.cardButtonForegroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
@@ -239,21 +241,21 @@ struct ProfileView: View {
             Text(value)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(Constants.primaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
             Text(title)
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundStyle(Constants.secondaryTextColor)
+                .foregroundStyle(Constants.textOnYellowColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }
         .padding(12)
         .aspectRatio(1, contentMode: .fit)
         .frame(maxWidth: .infinity)
-        .background(Constants.backgroundSecondaryColor)
+        .background(Constants.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
     }

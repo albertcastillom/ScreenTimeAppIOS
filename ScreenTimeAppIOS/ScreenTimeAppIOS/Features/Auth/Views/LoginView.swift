@@ -16,26 +16,31 @@ struct LoginView: View {
     
     var body: some View {
         ZStack {
-            Color("Background").ignoresSafeArea()
+            Constants.appBackgroundColor.ignoresSafeArea()
         
             VStack {
-                
+                Spacer()
+                Text("Commit: Social App Blocker")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Constants.primaryTextColor)
                 Spacer()
                 
                 Text("Login In")
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundStyle(Constants.primaryTextColor)
                 TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Constants.inputBackgroundColor)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
                 
                 SecureField("Enter your password", text: $password)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Constants.inputBackgroundColor)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
                 
@@ -45,8 +50,8 @@ struct LoginView: View {
                     Text("Login")
                         .frame(width: 360, height: 48)
                         .font(.headline)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
+                        .background(Constants.buttonBackgroundColor)
+                        .foregroundStyle(Constants.buttonForegroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .padding(.vertical)

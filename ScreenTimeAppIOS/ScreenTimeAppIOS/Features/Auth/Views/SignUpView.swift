@@ -14,22 +14,28 @@ struct SignUpView: View {
     
     var body: some View {
         ZStack {
-            Color("Background").ignoresSafeArea()
+            Constants.appBackgroundColor.ignoresSafeArea()
             
             VStack {
+                Spacer()
+                Text("Commit: Social App Blocker")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Constants.primaryTextColor)
                 
                 Spacer()
                 
                 Text("Create an Account")
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundStyle(Constants.primaryTextColor)
                 Text("Please enter your email address to continue")
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(Constants.secondaryTextColor)
                 TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Constants.inputBackgroundColor)
                     .cornerRadius(10)
                     .padding(.horizontal, 24)
             
@@ -40,8 +46,8 @@ struct SignUpView: View {
                     Text("Continue")
                         .frame(width: 360, height: 48)
                         .font(.headline)
-                        .background(.buttonBackground)
-                        .foregroundColor(.buttonForeground)
+                        .background(Constants.buttonBackgroundColor)
+                        .foregroundStyle(Constants.buttonForegroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .padding(.vertical)

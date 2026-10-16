@@ -10,7 +10,7 @@ import SwiftUI
 struct LeaderboardView: View {
     var body: some View {
        ZStack {
-           Color("Background").ignoresSafeArea(edges: .all)
+           Constants.appBackgroundColor.ignoresSafeArea(edges: .all)
            
            VStack {
                //leaderboard title
@@ -18,7 +18,7 @@ struct LeaderboardView: View {
                    Text("Leaderboard")
                        .font(.largeTitle)
                        .fontWeight(.bold)
-                       .foregroundStyle(Color("PrimaryText"))
+                       .foregroundStyle(Constants.primaryTextColor)
 
                    Spacer()
                }
@@ -38,18 +38,18 @@ struct LeaderboardView: View {
     
                    HStack{
                        Text("Mia Kim")
-                           .foregroundStyle(Color("PrimaryText"))
+                           .foregroundStyle(Constants.textOnYellowColor)
                        
                        Spacer()
                        
                        Text("52 Hrs")
-                           .foregroundStyle(Color("PrimaryText"))
+                           .foregroundStyle(Constants.textOnYellowColor)
                    }
                    
                }
                .padding(20) // Spacing inside the card
                .frame(maxWidth: .infinity, alignment: .leading) // Fills available horizontal width
-               .background(Color("BackgroundSecondary"))
+               .background(Constants.cardBackgroundColor)
                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous)) // Smooth corners
                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5) // Soft drop shadow
                .padding(.horizontal) // Spacing outside the card
@@ -72,8 +72,8 @@ struct LeaderboardView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
         }
-        .background(.buttonBackground)
-        .foregroundColor(.buttonForeground)
+        .background(Constants.buttonBackgroundColor)
+        .foregroundStyle(Constants.buttonForegroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
     }
 }
