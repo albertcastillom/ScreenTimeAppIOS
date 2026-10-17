@@ -52,15 +52,16 @@ struct FriendsView: View {
                searchCard
                
                //Add friends button
-               Button(isShowingSearch ? "Close Search" : "Add Friends +") {
+               Button {
                    isShowingSearch.toggle()
+               } label: {
+                   Text(isShowingSearch ? "Close Search" : "Add Friend +")
+                       .frame(maxWidth: .infinity, minHeight: 48)
+                       .background(Constants.buttonBackgroundColor)
+                       .foregroundStyle(Constants.buttonForegroundColor)
+                       .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                       .padding(.horizontal)
                }
-               .padding()
-               .frame(maxWidth: .infinity, minHeight: 48)
-               .background(Constants.buttonBackgroundColor)
-               .foregroundStyle(Constants.buttonForegroundColor)
-               .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-               .padding(.horizontal)
                
                Spacer()
            }
