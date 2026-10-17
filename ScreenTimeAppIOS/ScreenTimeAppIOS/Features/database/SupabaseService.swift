@@ -158,16 +158,18 @@ struct SupabaseService {
         }
         return friends
     }
-
-    func getFriendships(for userID: UUID? = nil) async throws -> [Friendship] {
-        let userID = try await resolvedUserID(userID)
-
-        return try await client
+    
+    func getAcceptedFriendsCount() async throws -> Int {
+        let userID = try await currentUserID()
+        
+        let response = try await client
             .from("friendships")
-            .select()
+            .select("*", head: true, count: .exact)
             .or("requester_id.eq.\(userID.uuidString),addressee_id.eq.\(userID.uuidString)")
+            .eq("status", value: FriendshipStatus.accepted.rawValue)
             .execute()
-            .value
+        
+        return response.count ?? 0
     }
 
     func getAcceptedFriendships(for userID: UUID? = nil) async throws -> [Friendship] {
@@ -276,7 +278,19 @@ struct SupabaseService {
             .execute()
             .value
     }
-
+    
+    func getTotalUserFocusSessions() async throws -> Int {
+        let userID = try await currentUserID()
+        
+        let response = try await client
+            .from("focus_requests")
+            .select(head: true, count: .exact)
+            .eq("requester_id", value: userID.uuidString)
+            .eq("status", value: FocusRequestStatus.activated.rawValue)
+            .execute()
+            
+        return response.count ?? 0
+    }
     // MARK: Focus Requests - Writes
 
     func createFocusRequest(approverID: UUID, durationMinutes: Int) async throws -> FocusRequest {

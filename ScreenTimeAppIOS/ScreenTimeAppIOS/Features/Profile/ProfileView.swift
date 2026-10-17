@@ -31,7 +31,7 @@ struct ProfileView: View {
                 
                 //Stats card
                 HStack(spacing: 8) {
-                    statCard(value: "20", title: "Sessions")
+                    statCard(value: "\(viewModel.sessionsCount)", title: "Sessions")
                     statCard(value: "3d", title: "Streak")
                     statCard(value: "\(viewModel.friendsCount)", title: "Friends")
                     statCard(value: "#4", title: "Rank")

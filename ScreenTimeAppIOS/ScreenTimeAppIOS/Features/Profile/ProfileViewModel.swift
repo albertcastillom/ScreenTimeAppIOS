@@ -11,6 +11,7 @@ import Observation
 final class ProfileViewModel {
     var profile: Profile?
     var friendsCount = 0
+    var sessionsCount = 0
     var isLoading = false
     var errorMessage: String?
 
@@ -30,10 +31,12 @@ final class ProfileViewModel {
 
         do {
             async let profile = service.getCurrentProfile()
-            async let friends = service.getFriends()
+            async let friends = service.getAcceptedFriendsCount()
+            async let sessions = service.getTotalUserFocusSessions()
 
             self.profile = try await profile
-            self.friendsCount = try await friends.count
+            self.friendsCount = try await friends
+            self.sessionsCount = try await sessions
         } catch {
             errorMessage = "Failed to load profile."
             print("DEBUG: Failed to load profile: \(error)")
