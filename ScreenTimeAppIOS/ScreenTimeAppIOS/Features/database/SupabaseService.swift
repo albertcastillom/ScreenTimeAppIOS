@@ -291,6 +291,17 @@ struct SupabaseService {
             
         return response.count ?? 0
     }
+    
+    func getTotalUserFocusDuration() async throws -> Int {
+        let userID = try await currentUserID()
+        
+        let totalDuration: Int = try await client
+            .rpc("get_user_total_focus_duration", params: ["target_user_id": userID.uuidString])
+            .execute()
+            .value
+        
+        return totalDuration
+    }
     // MARK: Focus Requests - Writes
 
     func createFocusRequest(approverID: UUID, durationMinutes: Int) async throws -> FocusRequest {
