@@ -194,6 +194,7 @@ struct SessionView: View {
 
     private func durationButton(minutes: Int) -> some View {
         let isSelected = selectedDurationMinutes == minutes
+        let shape = RoundedRectangle(cornerRadius: 15, style: .continuous)
         
         return Button {
             selectedDurationMinutes = minutes
@@ -203,9 +204,12 @@ struct SessionView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .background(isSelected ? Constants.cardBackgroundColor : Constants.cardButtonBackgroundColor)
                 .foregroundStyle(isSelected ? Constants.textOnYellowColor : Constants.cardButtonForegroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                .background(isSelected ? Constants.cardBackgroundColor : Constants.cardButtonBackgroundColor, in: shape)
+                .overlay{
+                    shape.strokeBorder(isSelected ? Constants.borderColor : .clear, lineWidth: 2)
+                }
+                .contentShape(shape)
         }
     }
 

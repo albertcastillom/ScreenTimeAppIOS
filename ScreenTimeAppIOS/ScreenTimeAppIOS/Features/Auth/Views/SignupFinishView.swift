@@ -24,7 +24,7 @@ struct SignupFinishView: View {
     
     var body: some View {
         ZStack {
-            Constants.appBackgroundColor.ignoresSafeArea()
+            Constants.authSurfaceColor.ignoresSafeArea()
             
             VStack {
                 

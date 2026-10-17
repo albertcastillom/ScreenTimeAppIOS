@@ -14,6 +14,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>ScreenTimeShieldConfiguration.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -23,6 +28,11 @@
 			<true/>
 		</dict>
 		<key>A9601B77301C2E56002238E9</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A9D833443082F13C00917CAD</key>
 		<dict>
 			<key>primary</key>
 			<true/>

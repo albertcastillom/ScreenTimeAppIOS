@@ -10,6 +10,9 @@
 		A92ECF8C3011C82300017CEE /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A92ECF8B3011C82300017CEE /* Supabase */; };
 		A9601B7B301C2E56002238E9 /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9601B7A301C2E56002238E9 /* DeviceActivity.framework */; };
 		A9601B83301C2E56002238E9 /* ScreenTimeMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A9601B78301C2E56002238E9 /* ScreenTimeMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A9D833473082F13D00917CAD /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D833463082F13C00917CAD /* ManagedSettings.framework */; };
+		A9D833493082F13D00917CAD /* ManagedSettingsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D833483082F13D00917CAD /* ManagedSettingsUI.framework */; };
+		A9D833513082F13D00917CAD /* ScreenTimeShieldConfiguration.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A9D833453082F13C00917CAD /* ScreenTimeShieldConfiguration.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -19,6 +22,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = A9601B77301C2E56002238E9;
 			remoteInfo = ScreenTimeMonitor;
+		};
+		A9D8334F3082F13D00917CAD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A92ECF4530096A0300017CEE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A9D833443082F13C00917CAD;
+			remoteInfo = ScreenTimeShieldConfiguration;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -30,6 +40,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				A9601B83301C2E56002238E9 /* ScreenTimeMonitor.appex in Embed Foundation Extensions */,
+				A9D833513082F13D00917CAD /* ScreenTimeShieldConfiguration.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -40,6 +51,9 @@
 		A92ECF4D30096A0300017CEE /* ScreenTimeAppIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScreenTimeAppIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9601B78301C2E56002238E9 /* ScreenTimeMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScreenTimeMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9601B7A301C2E56002238E9 /* DeviceActivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceActivity.framework; path = System/Library/Frameworks/DeviceActivity.framework; sourceTree = SDKROOT; };
+		A9D833453082F13C00917CAD /* ScreenTimeShieldConfiguration.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScreenTimeShieldConfiguration.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9D833463082F13C00917CAD /* ManagedSettings.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettings.framework; path = System/Library/Frameworks/ManagedSettings.framework; sourceTree = SDKROOT; };
+		A9D833483082F13D00917CAD /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -49,6 +63,13 @@
 				Info.plist,
 			);
 			target = A9601B77301C2E56002238E9 /* ScreenTimeMonitor */;
+		};
+		A9D833523082F13D00917CAD /* Exceptions for "ScreenTimeShieldConfiguration" folder in "ScreenTimeShieldConfiguration" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A9D833443082F13C00917CAD /* ScreenTimeShieldConfiguration */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -64,6 +85,14 @@
 				A9601B84301C2E56002238E9 /* Exceptions for "ScreenTimeMonitor" folder in "ScreenTimeMonitor" target */,
 			);
 			path = ScreenTimeMonitor;
+			sourceTree = "<group>";
+		};
+		A9D8334A3082F13D00917CAD /* ScreenTimeShieldConfiguration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A9D833523082F13D00917CAD /* Exceptions for "ScreenTimeShieldConfiguration" folder in "ScreenTimeShieldConfiguration" target */,
+			);
+			path = ScreenTimeShieldConfiguration;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -85,6 +114,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A9D833423082F13C00917CAD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9D833473082F13D00917CAD /* ManagedSettings.framework in Frameworks */,
+				A9D833493082F13D00917CAD /* ManagedSettingsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -93,6 +131,7 @@
 			children = (
 				A92ECF4F30096A0300017CEE /* ScreenTimeAppIOS */,
 				A9601B7C301C2E56002238E9 /* ScreenTimeMonitor */,
+				A9D8334A3082F13D00917CAD /* ScreenTimeShieldConfiguration */,
 				A9601B79301C2E56002238E9 /* Frameworks */,
 				A92ECF4E30096A0300017CEE /* Products */,
 			);
@@ -103,6 +142,7 @@
 			children = (
 				A92ECF4D30096A0300017CEE /* ScreenTimeAppIOS.app */,
 				A9601B78301C2E56002238E9 /* ScreenTimeMonitor.appex */,
+				A9D833453082F13C00917CAD /* ScreenTimeShieldConfiguration.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -111,6 +151,8 @@
 			isa = PBXGroup;
 			children = (
 				A9601B7A301C2E56002238E9 /* DeviceActivity.framework */,
+				A9D833463082F13C00917CAD /* ManagedSettings.framework */,
+				A9D833483082F13D00917CAD /* ManagedSettingsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -131,6 +173,7 @@
 			);
 			dependencies = (
 				A9601B82301C2E56002238E9 /* PBXTargetDependency */,
+				A9D833503082F13D00917CAD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A92ECF4F30096A0300017CEE /* ScreenTimeAppIOS */,
@@ -165,6 +208,28 @@
 			productReference = A9601B78301C2E56002238E9 /* ScreenTimeMonitor.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		A9D833443082F13C00917CAD /* ScreenTimeShieldConfiguration */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A9D833533082F13D00917CAD /* Build configuration list for PBXNativeTarget "ScreenTimeShieldConfiguration" */;
+			buildPhases = (
+				A9D833413082F13C00917CAD /* Sources */,
+				A9D833423082F13C00917CAD /* Frameworks */,
+				A9D833433082F13C00917CAD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A9D8334A3082F13D00917CAD /* ScreenTimeShieldConfiguration */,
+			);
+			name = ScreenTimeShieldConfiguration;
+			packageProductDependencies = (
+			);
+			productName = ScreenTimeShieldConfiguration;
+			productReference = A9D833453082F13C00917CAD /* ScreenTimeShieldConfiguration.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -172,7 +237,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2660;
+				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					A92ECF4C30096A0300017CEE = {
@@ -180,6 +245,9 @@
 					};
 					A9601B77301C2E56002238E9 = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					A9D833443082F13C00917CAD = {
+						CreatedOnToolsVersion = 27.0;
 					};
 				};
 			};
@@ -202,6 +270,7 @@
 			targets = (
 				A92ECF4C30096A0300017CEE /* ScreenTimeAppIOS */,
 				A9601B77301C2E56002238E9 /* ScreenTimeMonitor */,
+				A9D833443082F13C00917CAD /* ScreenTimeShieldConfiguration */,
 			);
 		};
 /* End PBXProject section */
@@ -215,6 +284,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A9601B76301C2E56002238E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A9D833433082F13C00917CAD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -238,6 +314,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A9D833413082F13C00917CAD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -245,6 +328,11 @@
 			isa = PBXTargetDependency;
 			target = A9601B77301C2E56002238E9 /* ScreenTimeMonitor */;
 			targetProxy = A9601B81301C2E56002238E9 /* PBXContainerItemProxy */;
+		};
+		A9D833503082F13D00917CAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A9D833443082F13C00917CAD /* ScreenTimeShieldConfiguration */;
+			targetProxy = A9D8334F3082F13D00917CAD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -498,6 +586,66 @@
 			};
 			name = Release;
 		};
+		A9D833543082F13D00917CAD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenTimeShieldConfiguration/ScreenTimeShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W4R225M7E2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenTimeShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScreenTimeShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.AlbertC.ScreenTimeAppIOS.ScreenTimeShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A9D833553082F13D00917CAD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenTimeShieldConfiguration/ScreenTimeShieldConfiguration.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W4R225M7E2;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenTimeShieldConfiguration/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScreenTimeShieldConfiguration;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.AlbertC.ScreenTimeAppIOS.ScreenTimeShieldConfiguration;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -524,6 +672,15 @@
 			buildConfigurations = (
 				A9601B86301C2E56002238E9 /* Debug */,
 				A9601B87301C2E56002238E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A9D833533082F13D00917CAD /* Build configuration list for PBXNativeTarget "ScreenTimeShieldConfiguration" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A9D833543082F13D00917CAD /* Debug */,
+				A9D833553082F13D00917CAD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

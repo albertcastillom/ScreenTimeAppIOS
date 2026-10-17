@@ -28,6 +28,8 @@ struct Constants {
     static let buttonForegroundColor = Color("ButtonForeground")
     static let cardButtonBackgroundColor = Color("CardButtonBackground")
     static let cardButtonForegroundColor = Color("CardButtonForeground")
+    static let borderColor = Color("BorderColor")
+
 
     static let homeString = "Home"
     static let friendsString = "Friends"
