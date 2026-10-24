@@ -21,6 +21,7 @@ struct Constants {
     static let primaryTextColor = Color("PrimaryText")
     static let secondaryTextColor = Color("SecondaryText")
     static let textOnYellowColor = Color("TextOnYellow")
+    static let AuthPrimaryText = Color("AuthPrimaryText")
 
     // MARK: - Button Colors
 

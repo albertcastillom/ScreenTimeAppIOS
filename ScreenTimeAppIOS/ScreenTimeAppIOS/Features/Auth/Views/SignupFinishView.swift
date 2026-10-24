@@ -33,10 +33,10 @@ struct SignupFinishView: View {
                 Text("Finish Signing Up")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 Text("Please fill out the fields")
                     .font(.body)
-                    .foregroundStyle(Constants.secondaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 TextField("Enter your email", text: $email)
                     .font(.subheadline)
                     .padding(12)
@@ -59,7 +59,7 @@ struct SignupFinishView: View {
                     
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(passwordsMatch ? .green : .red)
+                            .foregroundStyle(passwordsMatch ? Constants.accentColor : .red)
                             .padding(.horizontal)
                     }
                 }
@@ -74,7 +74,7 @@ struct SignupFinishView: View {
                     
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(passwordsMatch ? .green : .red)
+                            .foregroundStyle(passwordsMatch ? Constants.accentColor : .red)
                             .padding(.horizontal)
                     }
                 }
@@ -100,10 +100,10 @@ struct SignupFinishView: View {
                 Button { dismiss() } label: {
                     HStack(spacing: 3){
                         Text("Already have an account?")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                         Text("Login")
                             .fontWeight(.semibold)
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                     }
                 }
             }

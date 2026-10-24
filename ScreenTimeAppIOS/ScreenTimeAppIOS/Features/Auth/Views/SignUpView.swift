@@ -21,17 +21,17 @@ struct SignUpView: View {
                 Text("Commit: Social App Blocker")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 
                 Spacer()
                 
                 Text("Create an Account")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 Text("Please enter your email address to continue")
                     .font(.body)
-                    .foregroundStyle(Constants.secondaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
@@ -60,11 +60,11 @@ struct SignUpView: View {
                 } label: {
                     HStack(spacing: 3){
                         Text("Already have an account?")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                         
                         Text("Login")
                             .fontWeight(.semibold)
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                     }
                 }
                 

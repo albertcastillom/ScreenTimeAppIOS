@@ -23,13 +23,13 @@ struct LoginView: View {
                 Text("Commit: Social App Blocker")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 Spacer()
                 
-                Text("Login In")
+                Text("Login")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundStyle(Constants.primaryTextColor)
+                    .foregroundStyle(Constants.AuthPrimaryText)
                 TextField("Email Address", text: $email)
                     .font(.subheadline)
                     .padding(12)
@@ -61,10 +61,10 @@ struct LoginView: View {
                 Button { dismiss() } label: {
                     HStack(spacing: 3){
                         Text("Dont have an account?")
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                         Text("Sign Up")
                             .fontWeight(.semibold)
-                            .foregroundStyle(Constants.secondaryTextColor)
+                            .foregroundStyle(Constants.AuthPrimaryText)
                         }
                 }
             }
