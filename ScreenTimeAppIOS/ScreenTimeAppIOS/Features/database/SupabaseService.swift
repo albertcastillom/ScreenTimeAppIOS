@@ -56,6 +56,8 @@ nonisolated enum FocusRequestStatus: String, Codable {
     case accepted
     case declined
     case activated
+    case completed
+    case completedEarly = "completed_early"
     case cancelled
     case expired
     case failed
@@ -83,6 +85,19 @@ nonisolated struct FocusRequest: Codable, Identifiable, Equatable {
         case activatedAt = "activated_at"
         case endsAt = "ends_at"
     }
+}
+
+// MARK: - Focus Session Models
+
+nonisolated enum FocusSessionSource: String, Codable {
+    case local
+    case friendRequest = "friend_request"
+}
+
+nonisolated enum FocusSessionStatus: String, Codable {
+    case active
+    case completed
+    case completedEarly = "completed_early"
 }
 
 // MARK: - Supabase Service
