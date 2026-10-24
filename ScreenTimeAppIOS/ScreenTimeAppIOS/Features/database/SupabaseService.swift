@@ -14,11 +14,13 @@ nonisolated struct Profile: Codable, Identifiable, Equatable {
     let id: UUID
     var username: String
     var createdAt: Date?
+    var showOnGlobalLeaderboard: Bool
 
     enum CodingKeys: String, CodingKey {
         case id
         case username
         case createdAt = "created_at"
+        case showOnGlobalLeaderboard = "show_on_global_leaderboard"
     }
 }
 
@@ -148,6 +150,16 @@ struct SupabaseService {
             .single()
             .execute()
             .value
+    }
+
+    func updateGlobalLeaderboardVisibility(_ isVisible: Bool) async throws {
+        let userID = try await currentUserID()
+
+        try await client
+            .from("profiles")
+            .update(["show_on_global_leaderboard": isVisible])
+            .eq("id", value: userID.uuidString)
+            .execute()
     }
 
     func deleteProfile(id: UUID) async throws {

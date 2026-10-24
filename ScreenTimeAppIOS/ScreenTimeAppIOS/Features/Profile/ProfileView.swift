@@ -11,7 +11,7 @@ struct ProfileView: View {
     @Environment(AuthManager.self) private var authManager
     @State private var viewModel = ProfileViewModel()
     @State private var isShowingDeleteConfirmation = false
-
+    
     var body: some View {
         ZStack {
             Constants.appBackgroundColor.ignoresSafeArea(edges: .all)
@@ -21,7 +21,7 @@ struct ProfileView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundStyle(Constants.primaryTextColor)
-
+                    
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -38,6 +38,37 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal)
                 
+                // Global Leadership participation card
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Global Leaderboard")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(Constants.textOnYellowColor)
+                    HStack {
+                        Text("Opt-In")
+                            .foregroundStyle(Constants.textOnYellowColor)
+                
+                        Toggle("", isOn: leaderboardVisibilityBinding)
+                            .toggleStyle(.switch)
+                            .tint(Constants.cardButtonBackgroundColor)
+                            .disabled(
+                                viewModel.profile == nil ||
+                                viewModel.isUpdatingLeaderboardVisibility
+                            )
+                    }
+                    if let errorMessage = viewModel.leaderboardUpdateError {
+                        Text(errorMessage)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Constants.cardBackgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding(.horizontal)
+                
                 
                 // Notification card
                 VStack(alignment: .leading, spacing: 12) {
@@ -49,14 +80,14 @@ struct ProfileView: View {
                         Text("Push Notifications")
                             .foregroundStyle(Constants.textOnYellowColor)
                         Toggle("", isOn: .constant(true))
-                            .toggleStyle(SwitchToggleStyle())
+                            .toggleStyle(.switch)
                             .tint(Constants.cardButtonBackgroundColor)
                     }
                     HStack {
                         Text("Friend Requests")
                             .foregroundStyle(Constants.textOnYellowColor)
                         Toggle("", isOn: .constant(true))
-                            .toggleStyle(SwitchToggleStyle())
+                            .toggleStyle(.switch)
                             .tint(Constants.cardButtonBackgroundColor)
                     }
                 }
@@ -158,7 +189,7 @@ struct ProfileView: View {
             Text(authManager.accountDeletionError ?? "Please try again.")
         }
     }
-
+    
     private var profileCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             if viewModel.isLoading && viewModel.profile == nil {
@@ -177,6 +208,19 @@ struct ProfileView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         .padding(.horizontal)
     }
+    
+    private var leaderboardVisibilityBinding: Binding<Bool> {
+        Binding (
+            get: {
+                viewModel.profile?.showOnGlobalLeaderboard ?? false
+            },
+            set: { newValue in
+                Task {
+                    await viewModel.updateGlobalLeaderboardVisibility(newValue)
+                }
+            }
+           )
+        }
 
     private func profileContent(_ profile: Profile) -> some View {
         HStack {

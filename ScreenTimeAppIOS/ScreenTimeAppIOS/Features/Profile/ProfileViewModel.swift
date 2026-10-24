@@ -13,6 +13,8 @@ final class ProfileViewModel {
     var friendsCount = 0
     var sessionsCount = 0
     var isLoading = false
+    var isUpdatingLeaderboardVisibility = false
+    var leaderboardUpdateError: String?
     var errorMessage: String?
 
     private let service: SupabaseService
@@ -43,6 +45,31 @@ final class ProfileViewModel {
         }
 
         isLoading = false
+    }
+    
+    func updateGlobalLeaderboardVisibility(_ isVisible: Bool) async {
+        guard let profile else{
+            return
+        }
+        
+        let previousValue = profile.showOnGlobalLeaderboard
+        //update screen first
+        self.profile?.showOnGlobalLeaderboard = isVisible
+        isUpdatingLeaderboardVisibility = true
+        leaderboardUpdateError = nil
+        
+        defer {
+            isUpdatingLeaderboardVisibility = false
+        }
+        do{
+            try await service.updateGlobalLeaderboardVisibility(isVisible)
+        }catch{
+            //restore old value if supabase error
+            self.profile?.showOnGlobalLeaderboard = previousValue
+            leaderboardUpdateError = "Unable to Update leaderboard visibility."
+            
+            print("DEBUG: Failed to update leaderboard visibility: \(error)")
+        }
     }
 
     func updateUsername(_ username: String) async {
