@@ -21,20 +21,29 @@ final class AppBlockingModel {
     }
     var isBlocking = false
     var sessionEndDate: Date?
+    private(set) var focusSessionID: UUID?
+    private(set) var errorMessage: String?
 
     @ObservationIgnored private let restrictionsService: RestrictionsService
     @ObservationIgnored private let stateStore: BlockingStateStore
+    @ObservationIgnored private let service: SupabaseService
 
     init() {
         self.restrictionsService = RestrictionsService()
         self.stateStore = BlockingStateStore()
+        self.service = SupabaseService()
         activitySelection = stateStore.loadActivitySelection()
         refreshBlockingState()
     }
 
-    init(restrictionsService: RestrictionsService, stateStore: BlockingStateStore) {
+    init(
+        restrictionsService: RestrictionsService,
+        stateStore: BlockingStateStore,
+        service: SupabaseService? = nil
+    ) {
         self.restrictionsService = restrictionsService
         self.stateStore = stateStore
+        self.service = service ?? SupabaseService()
         activitySelection = stateStore.loadActivitySelection()
         refreshBlockingState()
     }
@@ -47,7 +56,7 @@ final class AppBlockingModel {
     func startFocusSession(durationMinutes: Int) -> Bool {
         // Do not let a second request replace the one shared schedule/store. It can
         // remain accepted in Supabase and be retried after this session finishes.
-        guard !isBlocking, hasSelectedActivities else {
+        guard !isBlocking, focusSessionID == nil, hasSelectedActivities else {
             return false
         }
 
@@ -63,15 +72,88 @@ final class AppBlockingModel {
         return true
     }
 
-    func stopFocusSession() {
-        restrictionsService.stopBlocking()
-        updateBlockingState(isBlocking: false, sessionEndDate: nil)
+    @discardableResult
+    func startLocalFocusSession(durationMinutes: Int) async -> Bool {
+        errorMessage = nil
+
+        guard startFocusSession(durationMinutes: durationMinutes) else {
+            if isBlocking {
+                errorMessage = "A focus session is already active."
+            } else if focusSessionID != nil {
+                errorMessage = "The previous focus session is still syncing."
+            } else {
+                errorMessage = "Choose at least one app, category, or website to block."
+            }
+            return false
+        }
+
+        do {
+            let session = try await service.startLocalFocusSession(
+                durationMinutes: durationMinutes
+            )
+            focusSessionID = session.id
+            sessionEndDate = session.scheduledEndsAt
+            stateStore.saveBlockingState(
+                isBlocking: true,
+                sessionEndDate: session.scheduledEndsAt
+            )
+            stateStore.saveFocusSessionID(session.id)
+            return true
+        } catch {
+            restrictionsService.stopBlocking()
+            clearBlockingStateAndSessionID()
+            errorMessage = "Could not save the focus session. App blocking was stopped."
+            return false
+        }
+    }
+
+    @discardableResult
+    func endFocusSessionEarly() async -> Bool {
+        errorMessage = nil
+
+        guard let focusSessionID else {
+            restrictionsService.stopBlocking()
+            updateBlockingState(isBlocking: false, sessionEndDate: nil)
+            return true
+        }
+
+        do {
+            _ = try await service.endFocusSessionEarly(id: focusSessionID)
+            restrictionsService.stopBlocking()
+            clearBlockingStateAndSessionID()
+            return true
+        } catch {
+            errorMessage = "Could not end the focus session. App blocking is still active."
+            return false
+        }
+    }
+
+    func reconcileElapsedFocusSession() async {
+        refreshBlockingState()
+
+        guard let focusSessionID else {
+            return
+        }
+
+        do {
+            let session = try await service.reconcileElapsedFocusSession(id: focusSessionID)
+            errorMessage = nil
+            guard session.status != .active else {
+                return
+            }
+
+            restrictionsService.stopBlocking()
+            clearBlockingStateAndSessionID()
+        } catch {
+            errorMessage = "Could not reconcile the last focus session."
+        }
     }
 
     func refreshBlockingState() {
         let blockingState = stateStore.loadBlockingState()
         isBlocking = blockingState.isBlocking
         sessionEndDate = blockingState.sessionEndDate
+        focusSessionID = blockingState.focusSessionID
     }
 
     var blockedSelectionSummary: [String] {
@@ -96,6 +178,12 @@ final class AppBlockingModel {
         self.isBlocking = isBlocking
         self.sessionEndDate = sessionEndDate
         stateStore.saveBlockingState(isBlocking: isBlocking, sessionEndDate: sessionEndDate)
+    }
+
+    private func clearBlockingStateAndSessionID() {
+        focusSessionID = nil
+        stateStore.saveFocusSessionID(nil)
+        updateBlockingState(isBlocking: false, sessionEndDate: nil)
     }
 
     private var hasSelectedActivities: Bool {

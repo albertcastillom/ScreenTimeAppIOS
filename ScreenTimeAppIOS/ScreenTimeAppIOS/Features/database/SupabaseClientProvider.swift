@@ -18,7 +18,12 @@ enum SupabaseClientProvider {
 
         return SupabaseClient(
             supabaseURL: projectURL,
-            supabaseKey: AppConstants.projectAPIKey
+            supabaseKey: AppConstants.projectAPIKey,
+            options: SupabaseClientOptions(
+                    auth: .init(
+                        emitLocalSessionAsInitialSession: true
+                    )
+                )
         )
     }()
 }

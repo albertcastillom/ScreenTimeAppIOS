@@ -22,6 +22,7 @@ struct SessionView: View {
     @State private var focusSessionViewModel = FocusRequestsViewModel()
     @State private var selectedFriend: Profile?
     @State private var selectedDurationMinutes: Int?
+    @State private var isUpdatingLocalSession = false
     
     var body: some View {
         @Bindable var appBlockingModel = appBlockingModel
@@ -101,7 +102,9 @@ struct SessionView: View {
                     
                     //local block apps button(move later)
                     Button {
-                        toggleLocalFocusSession()
+                        Task {
+                            await toggleLocalFocusSession()
+                        }
                     } label: {
                         Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
                             .frame(width: 360, height: 48)
@@ -109,6 +112,15 @@ struct SessionView: View {
                             .background(Constants.buttonBackgroundColor)
                             .foregroundStyle(Constants.buttonForegroundColor)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .disabled(isUpdatingLocalSession)
+
+                    if let errorMessage = appBlockingModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
                     }
                     
                     //send request to a friend
@@ -234,11 +246,20 @@ struct SessionView: View {
         .buttonStyle(.plain)
     }
 
-    private func toggleLocalFocusSession() {
+    private func toggleLocalFocusSession() async {
+        guard !isUpdatingLocalSession else {
+            return
+        }
+
+        isUpdatingLocalSession = true
+        defer { isUpdatingLocalSession = false }
+
         if appBlockingModel.isBlocking {
-            appBlockingModel.stopFocusSession()
+            await appBlockingModel.endFocusSessionEarly()
         } else if let selectedDurationMinutes {
-            appBlockingModel.startFocusSession(durationMinutes: selectedDurationMinutes)
+            await appBlockingModel.startLocalFocusSession(
+                durationMinutes: selectedDurationMinutes
+            )
         } else {
             focusSessionViewModel.errorMessage = "Choose a duration first."
         }

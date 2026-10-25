@@ -14,5 +14,6 @@ enum ScreenTimeIdentifiers {
 
     static let isBlockingKey = "isBlocking"
     static let sessionEndDateKey = "sessionEndDate"
+    static let focusSessionIDKey = "focusSessionID"
     static let activitySelectionKey = "activitySelection"
 }

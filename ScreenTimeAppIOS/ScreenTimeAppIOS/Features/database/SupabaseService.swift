@@ -102,6 +102,28 @@ nonisolated enum FocusSessionStatus: String, Codable {
     case completedEarly = "completed_early"
 }
 
+nonisolated struct FocusSession: Codable, Identifiable, Equatable {
+    let id: UUID
+    let userID: UUID
+    let focusRequestID: UUID?
+    let source: FocusSessionSource
+    let status: FocusSessionStatus
+    let activatedAt: Date
+    let scheduledEndsAt: Date
+    let endedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userID = "user_id"
+        case focusRequestID = "focus_request_id"
+        case source
+        case status
+        case activatedAt = "activated_at"
+        case scheduledEndsAt = "scheduled_ends_at"
+        case endedAt = "ended_at"
+    }
+}
+
 // MARK: - Supabase Service
 
 struct SupabaseService {
@@ -380,6 +402,35 @@ struct SupabaseService {
             .value
     }
 
+    // MARK: Focus Sessions
+
+    func startLocalFocusSession(durationMinutes: Int) async throws -> FocusSession {
+        try await client
+            .rpc(
+                "start_local_focus_session",
+                params: StartLocalFocusSessionRPCPayload(durationMinutes: durationMinutes)
+            )
+            .single()
+            .execute()
+            .value
+    }
+
+    func endFocusSessionEarly(id: UUID) async throws -> FocusSession {
+        try await client
+            .rpc("end_focus_session_early", params: FocusSessionRPCPayload(sessionID: id))
+            .single()
+            .execute()
+            .value
+    }
+
+    func reconcileElapsedFocusSession(id: UUID) async throws -> FocusSession {
+        try await client
+            .rpc("reconcile_elapsed_focus_session", params: FocusSessionRPCPayload(sessionID: id))
+            .single()
+            .execute()
+            .value
+    }
+
     // MARK: Focus Requests - realtime
 
     func acceptedFocusRequestUpdates() async throws -> AsyncThrowingStream<FocusRequest, Error> {
@@ -487,6 +538,22 @@ nonisolated private struct FocusRequestRPCPayload: Encodable {
 
     enum CodingKeys: String, CodingKey {
         case requestID = "request_id"
+    }
+}
+
+nonisolated private struct StartLocalFocusSessionRPCPayload: Encodable {
+    let durationMinutes: Int
+
+    enum CodingKeys: String, CodingKey {
+        case durationMinutes = "duration_minutes"
+    }
+}
+
+nonisolated private struct FocusSessionRPCPayload: Encodable {
+    let sessionID: UUID
+
+    enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
     }
 }
 

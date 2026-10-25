@@ -35,7 +35,9 @@ struct MainTabView: View {
         .task {
             // One coordinator owns both the Realtime listener and the blocking
             // model shared by every tab through the environment.
+            await focusRequestCoordinator.appBlockingModel.reconcileElapsedFocusSession()
             focusRequestCoordinator.start()
+            await focusRequestCoordinator.reconcileAcceptedRequests()
         }
         .environment(focusRequestCoordinator.appBlockingModel)
         .onChange(of: scenePhase) { _, newPhase in
@@ -46,8 +48,9 @@ struct MainTabView: View {
             // Reconcile immediately after foregrounding; Realtime sockets can be
             // suspended while the app is in the background.
             focusRequestCoordinator.appBlockingModel.refreshBlockingState()
-            focusRequestCoordinator.start()
             Task {
+                await focusRequestCoordinator.appBlockingModel.reconcileElapsedFocusSession()
+                focusRequestCoordinator.start()
                 await focusRequestCoordinator.reconcileAcceptedRequests()
             }
         }

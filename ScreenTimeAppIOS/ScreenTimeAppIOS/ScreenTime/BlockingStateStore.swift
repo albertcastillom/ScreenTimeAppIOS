@@ -9,6 +9,7 @@ import Foundation
 struct BlockingSessionState {
     let isBlocking: Bool
     let sessionEndDate: Date?
+    let focusSessionID: UUID?
 }
 
 final class BlockingStateStore {
@@ -21,18 +22,28 @@ final class BlockingStateStore {
 
     func loadBlockingState(now: Date = Date()) -> BlockingSessionState {
         guard let defaults else {
-            return BlockingSessionState(isBlocking: false, sessionEndDate: nil)
+            return BlockingSessionState(isBlocking: false, sessionEndDate: nil, focusSessionID: nil)
         }
 
         let sessionEndDate = defaults.object(forKey: ScreenTimeIdentifiers.sessionEndDateKey) as? Date
         let isBlocking = defaults.bool(forKey: ScreenTimeIdentifiers.isBlockingKey)
+        let focusSessionID = defaults.string(forKey: ScreenTimeIdentifiers.focusSessionIDKey)
+            .flatMap { UUID(uuidString: $0) }
 
         if let sessionEndDate, sessionEndDate <= now {
             saveBlockingState(isBlocking: false, sessionEndDate: nil)
-            return BlockingSessionState(isBlocking: false, sessionEndDate: nil)
+            return BlockingSessionState(
+                isBlocking: false,
+                sessionEndDate: nil,
+                focusSessionID: focusSessionID
+            )
         }
 
-        return BlockingSessionState(isBlocking: isBlocking, sessionEndDate: sessionEndDate)
+        return BlockingSessionState(
+            isBlocking: isBlocking,
+            sessionEndDate: sessionEndDate,
+            focusSessionID: focusSessionID
+        )
     }
 
     func saveBlockingState(isBlocking: Bool, sessionEndDate: Date?) {
@@ -47,6 +58,14 @@ final class BlockingStateStore {
 
     func clearBlockingState() {
         saveBlockingState(isBlocking: false, sessionEndDate: nil)
+    }
+
+    func saveFocusSessionID(_ focusSessionID: UUID?) {
+        if let focusSessionID {
+            defaults?.set(focusSessionID.uuidString, forKey: ScreenTimeIdentifiers.focusSessionIDKey)
+        } else {
+            defaults?.removeObject(forKey: ScreenTimeIdentifiers.focusSessionIDKey)
+        }
     }
 
     func loadActivitySelection() -> FamilyActivitySelection {

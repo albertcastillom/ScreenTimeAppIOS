@@ -34,3 +34,13 @@ The `initial_remote_schema` baseline includes the complete focus-request lifecyc
 - The iOS coordinator also queries accepted outgoing requests on launch and whenever
   the app returns to the foreground, so Broadcast is the fast path rather than the
   only delivery mechanism.
+
+## Local focus-session lifecycle
+
+- `start_local_focus_session` derives the owner from `auth.uid()` and uses the
+  database clock for both activation and scheduled completion.
+- The main app stores the returned `focus_sessions.id` in its app-group defaults.
+- `end_focus_session_early` verifies ownership before completing an active row.
+- The monitor extension removes restrictions at the scheduled end without making
+  an authenticated network request. On the next foreground, the main app calls
+  `reconcile_elapsed_focus_session` to change an elapsed active row to `completed`.

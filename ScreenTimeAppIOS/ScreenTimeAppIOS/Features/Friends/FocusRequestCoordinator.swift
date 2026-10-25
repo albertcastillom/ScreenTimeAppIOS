@@ -123,6 +123,10 @@ final class FocusRequestCoordinator {
             return
         }
 
+        // Finish any naturally elapsed local session before starting the next
+        // shared Device Activity schedule.
+        await appBlockingModel.reconcileElapsedFocusSession()
+
         // The requester blocks their own saved selection. The approver controls
         // only whether the request is accepted, not which apps are selected.
         guard appBlockingModel.startFocusSession(durationMinutes: request.durationMinutes) else {
