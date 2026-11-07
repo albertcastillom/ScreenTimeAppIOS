@@ -101,19 +101,21 @@ struct SessionView: View {
                     }
                     
                     //local block apps button(move later)
-                    Button {
-                        Task {
-                            await toggleLocalFocusSession()
+                    if appBlockingModel.activeSessionSource != .focusRequest{
+                        Button {
+                            Task {
+                                await toggleLocalFocusSession()
+                            }
+                        } label: {
+                            Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
+                                .frame(width: 360, height: 48)
+                                .font(.headline)
+                                .background(Constants.buttonBackgroundColor)
+                                .foregroundStyle(Constants.buttonForegroundColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
-                    } label: {
-                        Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
-                            .frame(width: 360, height: 48)
-                            .font(.headline)
-                            .background(Constants.buttonBackgroundColor)
-                            .foregroundStyle(Constants.buttonForegroundColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .disabled(isUpdatingLocalSession)
                     }
-                    .disabled(isUpdatingLocalSession)
 
                     if let errorMessage = appBlockingModel.errorMessage {
                         Text(errorMessage)

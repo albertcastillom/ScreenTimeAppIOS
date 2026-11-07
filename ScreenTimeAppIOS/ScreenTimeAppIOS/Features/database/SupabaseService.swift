@@ -356,10 +356,13 @@ struct SupabaseService {
         let userID = try await currentUserID()
         
         let response = try await client
-            .from("focus_requests")
+            .from("focus_sessions")
             .select(head: true, count: .exact)
-            .eq("requester_id", value: userID.uuidString)
-            .eq("status", value: FocusRequestStatus.activated.rawValue)
+            .eq("user_id", value: userID.uuidString)
+            .in("status", values: [
+                FocusSessionStatus.completed.rawValue,
+                FocusSessionStatus.completedEarly.rawValue
+            ])
             .execute()
             
         return response.count ?? 0

@@ -129,7 +129,7 @@ final class FocusRequestCoordinator {
 
         // The requester blocks their own saved selection. The approver controls
         // only whether the request is accepted, not which apps are selected.
-        guard appBlockingModel.startFocusSession(durationMinutes: request.durationMinutes) else {
+        guard appBlockingModel.startFocusSession(durationMinutes: request.durationMinutes, source: .focusRequest) else {
             logger.error("Blocking failed for accepted request \(request.id.uuidString, privacy: .public)")
             handledRequestIDs.remove(request.id)
             errorMessage = "A focus request was accepted, but app blocking could not start."

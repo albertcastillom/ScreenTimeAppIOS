@@ -9,6 +9,11 @@ import Foundation
 import Observation
 import FamilyControls
 
+enum ActiveFocusSessionSource: String {
+    case local
+    case focusRequest
+}
+
 @Observable
 @MainActor
 final class AppBlockingModel {
@@ -20,6 +25,7 @@ final class AppBlockingModel {
         }
     }
     var isBlocking = false
+    private(set) var activeSessionSource: ActiveFocusSessionSource?
     var sessionEndDate: Date?
     private(set) var focusSessionID: UUID?
     private(set) var errorMessage: String?
@@ -53,7 +59,7 @@ final class AppBlockingModel {
     }
 
     @discardableResult
-    func startFocusSession(durationMinutes: Int) -> Bool {
+    func startFocusSession(durationMinutes: Int, source: ActiveFocusSessionSource) -> Bool {
         // Do not let a second request replace the one shared schedule/store. It can
         // remain accepted in Supabase and be retried after this session finishes.
         guard !isBlocking, focusSessionID == nil, hasSelectedActivities else {
@@ -68,6 +74,8 @@ final class AppBlockingModel {
         }
 
         let endDate = Date().addingTimeInterval(TimeInterval(durationMinutes * 60))
+        activeSessionSource = source
+        stateStore.saveActiveSessionSource(source)
         updateBlockingState(isBlocking: true, sessionEndDate: endDate)
         return true
     }
@@ -76,7 +84,7 @@ final class AppBlockingModel {
     func startLocalFocusSession(durationMinutes: Int) async -> Bool {
         errorMessage = nil
 
-        guard startFocusSession(durationMinutes: durationMinutes) else {
+        guard startFocusSession(durationMinutes: durationMinutes, source: .local) else {
             if isBlocking {
                 errorMessage = "A focus session is already active."
             } else if focusSessionID != nil {
@@ -109,7 +117,7 @@ final class AppBlockingModel {
 
         guard let focusSessionID else {
             restrictionsService.stopBlocking()
-            updateBlockingState(isBlocking: false, sessionEndDate: nil)
+            clearBlockingStateAndSessionID()
             return true
         }
 
@@ -173,6 +181,8 @@ final class AppBlockingModel {
         isBlocking = blockingState.isBlocking
         sessionEndDate = blockingState.sessionEndDate
         focusSessionID = blockingState.focusSessionID
+        activeSessionSource = stateStore.loadActiveSessionSource()
+        stateStore.saveActiveSessionSource(nil)
     }
 
     var blockedSelectionSummary: [String] {
@@ -201,7 +211,10 @@ final class AppBlockingModel {
 
     private func clearBlockingStateAndSessionID() {
         focusSessionID = nil
+        activeSessionSource = nil
+        
         stateStore.saveFocusSessionID(nil)
+        stateStore.saveActiveSessionSource(nil)
         updateBlockingState(isBlocking: false, sessionEndDate: nil)
     }
 

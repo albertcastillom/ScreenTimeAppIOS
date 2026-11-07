@@ -15,5 +15,6 @@ final class BlockingStateStore {
     func clearBlockingState() {
         defaults?.set(false, forKey: ScreenTimeIdentifiers.isBlockingKey)
         defaults?.removeObject(forKey: ScreenTimeIdentifiers.sessionEndDateKey)
+        
     }
 }

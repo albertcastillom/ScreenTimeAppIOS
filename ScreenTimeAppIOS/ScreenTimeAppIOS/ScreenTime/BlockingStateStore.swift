@@ -90,4 +90,21 @@ final class BlockingStateStore {
             print("Failed to save activity selection: \(error)")
         }
     }
+    
+    func saveActiveSessionSource(_ source: ActiveFocusSessionSource?){
+        if let source{
+            defaults?.set(source.rawValue, forKey: ScreenTimeIdentifiers.activeSessionSourceKey)
+        }else{
+            defaults?.removeObject(forKey: ScreenTimeIdentifiers.activeSessionSourceKey)
+        }
+    }
+    
+    func loadActiveSessionSource()-> ActiveFocusSessionSource? {
+        guard let rawValue = defaults?.string(forKey: ScreenTimeIdentifiers.activeSessionSourceKey)
+                else {
+            return nil
+        }
+        
+        return ActiveFocusSessionSource(rawValue: rawValue)
+    }
 }
