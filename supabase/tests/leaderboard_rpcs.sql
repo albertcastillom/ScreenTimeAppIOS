@@ -203,6 +203,23 @@ begin
     raise exception 'all_time must include the older completed session';
   end if;
 
+  if exists (
+    select 1
+    from public.get_friend_leaderboard('week') as weekly
+    join public.get_friend_leaderboard('month') as monthly
+      on monthly.profile_id = weekly.profile_id
+    where weekly.total_minutes > monthly.total_minutes
+  ) then
+    raise exception 'week totals must not exceed month totals';
+  end if;
+
+  if greatest(
+    date_trunc('week', timestamp with time zone '2026-11-01 12:00:00+00' at time zone 'UTC') at time zone 'UTC',
+    date_trunc('month', timestamp with time zone '2026-11-01 12:00:00+00' at time zone 'UTC') at time zone 'UTC'
+  ) <> timestamp with time zone '2026-11-01 00:00:00+00' then
+    raise exception 'the first partial week of a month must start on the first day of that month';
+  end if;
+
   begin
     perform public.get_friend_leaderboard('year');
     raise exception 'invalid p_period was accepted';

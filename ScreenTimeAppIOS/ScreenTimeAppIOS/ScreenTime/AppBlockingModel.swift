@@ -178,11 +178,17 @@ final class AppBlockingModel {
 
     func refreshBlockingState() {
         let blockingState = stateStore.loadBlockingState()
+        
         isBlocking = blockingState.isBlocking
         sessionEndDate = blockingState.sessionEndDate
         focusSessionID = blockingState.focusSessionID
-        activeSessionSource = stateStore.loadActiveSessionSource()
-        stateStore.saveActiveSessionSource(nil)
+        
+        if isBlocking{
+            activeSessionSource = stateStore.loadActiveSessionSource()
+        }else{
+            activeSessionSource = nil
+            stateStore.saveActiveSessionSource(nil)
+        }
     }
 
     var blockedSelectionSummary: [String] {
