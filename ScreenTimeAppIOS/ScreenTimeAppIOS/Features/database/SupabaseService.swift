@@ -124,6 +124,30 @@ nonisolated struct FocusSession: Codable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Leaderboard Models
+
+nonisolated enum LeaderboardPeriod: String, Codable, CaseIterable {
+    case week
+    case month
+    case allTime = "all_time"
+}
+
+nonisolated struct LeaderboardEntry: Codable, Identifiable, Equatable {
+    let profileID: UUID
+    let username: String
+    let totalMinutes: Int
+    let rank: Int
+
+    var id: UUID { profileID }
+
+    enum CodingKeys: String, CodingKey {
+        case profileID = "profile_id"
+        case username
+        case totalMinutes = "total_minutes"
+        case rank = "leaderboard_rank"
+    }
+}
+
 // MARK: - Supabase Service
 
 struct SupabaseService {
@@ -351,6 +375,32 @@ struct SupabaseService {
         
         return totalDuration
     }
+
+    // MARK: Leaderboards
+
+    func getFriendLeaderboard(period: LeaderboardPeriod) async throws -> [LeaderboardEntry] {
+        try await client
+            .rpc(
+                "get_friend_leaderboard",
+                params: FriendLeaderboardRPCPayload(period: period)
+            )
+            .execute()
+            .value
+    }
+
+    func getGlobalLeaderboard(
+        period: LeaderboardPeriod,
+        limit: Int = 50
+    ) async throws -> [LeaderboardEntry] {
+        try await client
+            .rpc(
+                "get_global_leaderboard",
+                params: GlobalLeaderboardRPCPayload(period: period, limit: limit)
+            )
+            .execute()
+            .value
+    }
+
     // MARK: Focus Requests - Writes
 
     func createFocusRequest(approverID: UUID, durationMinutes: Int) async throws -> FocusRequest {
@@ -427,6 +477,13 @@ struct SupabaseService {
         try await client
             .rpc("reconcile_elapsed_focus_session", params: FocusSessionRPCPayload(sessionID: id))
             .single()
+            .execute()
+            .value
+    }
+
+    func reconcileElapsedFocusSessions() async throws -> Int {
+        try await client
+            .rpc("reconcile_elapsed_focus_sessions")
             .execute()
             .value
     }
@@ -554,6 +611,24 @@ nonisolated private struct FocusSessionRPCPayload: Encodable {
 
     enum CodingKeys: String, CodingKey {
         case sessionID = "session_id"
+    }
+}
+
+nonisolated private struct FriendLeaderboardRPCPayload: Encodable {
+    let period: LeaderboardPeriod
+
+    enum CodingKeys: String, CodingKey {
+        case period = "p_period"
+    }
+}
+
+nonisolated private struct GlobalLeaderboardRPCPayload: Encodable {
+    let period: LeaderboardPeriod
+    let limit: Int
+
+    enum CodingKeys: String, CodingKey {
+        case period = "p_period"
+        case limit = "p_limit"
     }
 }
 

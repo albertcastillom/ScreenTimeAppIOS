@@ -139,7 +139,10 @@ final class FocusRequestCoordinator {
         logger.info("Blocking started for request \(request.id.uuidString, privacy: .public)")
 
         do {
-            _ = try await service.activateFocusRequest(id: request.id)
+            let activatedRequest = try await service.activateFocusRequest(id: request.id)
+            if let endsAt = activatedRequest.endsAt {
+                appBlockingModel.scheduleNaturalCompletion(at: endsAt)
+            }
             logger.info("Marked request \(request.id.uuidString, privacy: .public) activated")
             errorMessage = nil
         } catch {

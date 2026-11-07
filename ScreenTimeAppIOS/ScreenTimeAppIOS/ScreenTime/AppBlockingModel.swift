@@ -92,12 +92,8 @@ final class AppBlockingModel {
                 durationMinutes: durationMinutes
             )
             focusSessionID = session.id
-            sessionEndDate = session.scheduledEndsAt
-            stateStore.saveBlockingState(
-                isBlocking: true,
-                sessionEndDate: session.scheduledEndsAt
-            )
             stateStore.saveFocusSessionID(session.id)
+            scheduleNaturalCompletion(at: session.scheduledEndsAt)
             return true
         } catch {
             restrictionsService.stopBlocking()
@@ -131,6 +127,13 @@ final class AppBlockingModel {
     func reconcileElapsedFocusSession() async {
         refreshBlockingState()
 
+        do {
+            _ = try await service.reconcileElapsedFocusSessions()
+            errorMessage = nil
+        } catch {
+            errorMessage = "Could not reconcile elapsed focus sessions."
+        }
+
         guard let focusSessionID else {
             return
         }
@@ -146,6 +149,22 @@ final class AppBlockingModel {
             clearBlockingStateAndSessionID()
         } catch {
             errorMessage = "Could not reconcile the last focus session."
+        }
+    }
+
+    func scheduleNaturalCompletion(at endDate: Date) {
+        sessionEndDate = endDate
+        stateStore.saveBlockingState(isBlocking: true, sessionEndDate: endDate)
+
+        let delayNanoseconds = UInt64(max(0, endDate.timeIntervalSinceNow) * 1_000_000_000)
+        Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: delayNanoseconds)
+            } catch {
+                return
+            }
+
+            await self?.reconcileElapsedFocusSession()
         }
     }
 
