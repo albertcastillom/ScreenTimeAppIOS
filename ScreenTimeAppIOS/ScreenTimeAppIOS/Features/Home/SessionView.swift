@@ -29,125 +29,139 @@ struct SessionView: View {
 
         ZStack {
             Constants.appBackgroundColor.ignoresSafeArea(edges: .all)
-
-            ScrollView {
+            
+            if appBlockingModel.isBlocking {
                 VStack {
-                    //Page Title
-                    HStack {
-                        Text("Start Focus Session")
-                            .font(.title)
-                            .bold()
-                            .foregroundStyle(Constants.primaryTextColor)
-                            .padding()
-
-                        Spacer()
-                    }
-                    
-                    //Duration Selections
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Duration")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Constants.textOnYellowColor)
-
-                        LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(durations, id: \.self) { minutes in
-                                durationButton(minutes: minutes)
-                            }
+                    activeSessionCard
+                    Spacer()
+                }
+                
+            }else {
+                
+                ScrollView {
+                    VStack {
+                        //Page Title
+                        HStack {
+                            Text("Start Focus Session")
+                                .font(.title)
+                                .bold()
+                                .foregroundStyle(Constants.primaryTextColor)
+                                .padding()
+                            
+                            Spacer()
                         }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    .padding(.horizontal)
-                    
-                    //friends to notify card
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Choose a friend to notify")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Constants.textOnYellowColor)
-
-                        Text("They'll get a request to start a session with you")
-                            .foregroundStyle(Constants.textOnYellowColor)
-                            .fontWeight(.semibold)
-
+                        
+                        //Duration Selections
                         VStack(alignment: .leading, spacing: 12) {
-                            ForEach(focusSessionViewModel.friends) { friend in
-                                friendSelectionRow(friend)
+                            Text("Duration")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Constants.textOnYellowColor)
+                            
+                            LazyVGrid(columns: columns, spacing: 16) {
+                                ForEach(durations, id: \.self) { minutes in
+                                    durationButton(minutes: minutes)
+                                }
                             }
                         }
-                    }
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Constants.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    .padding(.horizontal)
-
-                    if focusSessionViewModel.hasSentFocusSessions {
-                        sentFocusRequestsCard
-                    }
-                    
-                    //error messages with focus request
-                    if let errorMessage = focusSessionViewModel.errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
-                    }
-                    
-                    //local block apps button(move later)
-                    if appBlockingModel.activeSessionSource != .focusRequest{
+                        .padding(20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Constants.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .padding(.horizontal)
+                        
+                        //friends to notify card
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Choose a friend to notify")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Constants.textOnYellowColor)
+                            
+                            Text("They'll get a request to start a session with you")
+                                .foregroundStyle(Constants.textOnYellowColor)
+                                .fontWeight(.semibold)
+                            
+                            VStack(alignment: .leading, spacing: 12) {
+                                ForEach(focusSessionViewModel.friends) { friend in
+                                    friendSelectionRow(friend)
+                                }
+                            }
+                        }
+                        .padding(20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Constants.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .padding(.horizontal)
+                        
+                        if focusSessionViewModel.hasSentFocusSessions {
+                            sentFocusRequestsCard
+                        }
+                        
+                        //error messages with focus request
+                        if let errorMessage = focusSessionViewModel.errorMessage {
+                            Text(errorMessage)
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
+                        }
+                        
+                        //local block apps button(move later)
+                     
+                            Button {
+                                Task {
+                                    await toggleLocalFocusSession()
+                                }
+                            } label: {
+                                Text("Start Local Block")
+                                    .frame(width: 360, height: 48)
+                                    .font(.headline)
+                                    .background(Constants.buttonBackgroundColor)
+                                    .foregroundStyle(Constants.buttonForegroundColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            }
+                            .disabled(isUpdatingLocalSession)
+                        
+                        if let errorMessage = appBlockingModel.errorMessage {
+                            Text(errorMessage)
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
+                        }
+                        
+                        //send request to a friend
                         Button {
                             Task {
-                                await toggleLocalFocusSession()
+                                
+                                guard !appBlockingModel.isBlocking else {
+                                    focusSessionViewModel.errorMessage = "Wait for current focus session to end"
+                                    return
+                                }
+                                await focusSessionViewModel.sendFocusSessionRequest(
+                                    to: selectedFriend,
+                                    durationMinutes: selectedDurationMinutes
+                                )
                             }
                         } label: {
-                            Text(appBlockingModel.isBlocking ? "Stop" : "Start Local Block")
+                            Text("Send Request")
                                 .frame(width: 360, height: 48)
                                 .font(.headline)
                                 .background(Constants.buttonBackgroundColor)
                                 .foregroundStyle(Constants.buttonForegroundColor)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
-                        .disabled(isUpdatingLocalSession)
+                        
+                        Spacer()
                     }
-
-                    if let errorMessage = appBlockingModel.errorMessage {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
-                    }
-                    
-                    //send request to a friend
-                    Button {
-                        Task {
-                            await focusSessionViewModel.sendFocusSessionRequest(
-                                to: selectedFriend,
-                                durationMinutes: selectedDurationMinutes
-                            )
-                        }
-                    } label: {
-                        Text("Send Request")
-                            .frame(width: 360, height: 48)
-                            .font(.headline)
-                            .background(Constants.buttonBackgroundColor)
-                            .foregroundStyle(Constants.buttonForegroundColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    }
-
-                    Spacer()
+                }
+                .task {
+                    await focusSessionViewModel.loadFocusSessionScreen()
                 }
             }
-        }
-        .task {
-            await focusSessionViewModel.loadFocusSessionScreen()
+            
         }
     }
 
@@ -265,6 +279,48 @@ struct SessionView: View {
         } else {
             focusSessionViewModel.errorMessage = "Choose a duration first."
         }
+    }
+    
+    private var activeSessionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Focus Session Active")
+                .font(.title2.bold())
+                .foregroundStyle(Constants.textOnYellowColor)
+
+            if let endDate = appBlockingModel.sessionEndDate {
+                let timerStartDate = Date()
+
+                Text(
+                    timerInterval: timerStartDate...max(endDate, timerStartDate),
+                    countsDown: true
+                )
+                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(Constants.textOnYellowColor)
+            }
+
+            if appBlockingModel.activeSessionSource == .local {
+                Button {
+                    Task {
+                        await toggleLocalFocusSession()
+                    }
+                } label: {
+                    Text("Stop")
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .font(.headline)
+                        .background(Constants.cardButtonBackgroundColor)
+                        .foregroundStyle(Constants.cardButtonForegroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .disabled(isUpdatingLocalSession)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Constants.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .padding(.horizontal)
     }
 }
 
