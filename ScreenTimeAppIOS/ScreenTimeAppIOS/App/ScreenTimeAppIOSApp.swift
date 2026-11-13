@@ -16,6 +16,11 @@ struct ScreenTimeAppIOSApp: App {
         WindowGroup {
             AppRootView()
                 .environment(authManager)
+                .onOpenURL{ url in
+                    Task{
+                        await authManager.handleAuthCallback(url)
+                    }
+                }
         }
     }
 }

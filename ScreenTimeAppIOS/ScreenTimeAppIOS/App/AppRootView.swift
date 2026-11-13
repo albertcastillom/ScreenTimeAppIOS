@@ -15,27 +15,35 @@ struct AppRootView: View {
     
     var body: some View {
         Group {
-            switch authManager.authState {
-            case .notDetermined:
+            if authManager.isPasswordRecoveryActive {
+                ResetPasswordView()
+            } else {
+                switch authManager.authState {
+                case .notDetermined:
                     ProgressView()
-            case .notAuthenticated:
-                NavigationStack {
-                    SignUpView()
-                }
-            case .authenticated:
-                //Displays home page
-                VStack{
-                    if screenTimeManager.authorizationStatus == .notDetermined {
-                        ScreenTimePermissionView(screenTimeManager: screenTimeManager)
-                    } else if screenTimeManager.authorizationStatus == .approved {
-                        MainTabView()
-                    } else {
-                        Text("Authorization Denied or Restricted. Please enable in Settings.")
-                        // Guide user to Settings if needed
+                case .notAuthenticated:
+                    NavigationStack {
+                        if authManager.shouldShowLogin {
+                            LoginView()
+                        } else {
+                            SignUpView()
+                        }
                     }
-                }
-                .onAppear {
-                    screenTimeManager.checkAuthorization()
+                case .authenticated:
+                    //Displays home page
+                    VStack{
+                        if screenTimeManager.authorizationStatus == .notDetermined {
+                            ScreenTimePermissionView(screenTimeManager: screenTimeManager)
+                        } else if screenTimeManager.authorizationStatus == .approved {
+                            MainTabView()
+                        } else {
+                            Text("Authorization Denied or Restricted. Please enable in Settings.")
+                            // Guide user to Settings if needed
+                        }
+                    }
+                    .onAppear {
+                        screenTimeManager.checkAuthorization()
+                    }
                 }
             }
         }

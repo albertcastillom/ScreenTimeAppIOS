@@ -8,28 +8,27 @@
 import SwiftUI
 
 struct SignupFinishView: View {
-    
+
     @Environment(AuthManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var email: String
     @State private var username = ""
     @State private var password = ""
     @State private var confirmedPassword = ""
-    @State private var passwordsMatch = false
-    
+
     init(email: String) {
         _email = State(initialValue: email)
     }
-    
+
     var body: some View {
         ZStack {
             Constants.authSurfaceColor.ignoresSafeArea()
-            
+
             VStack {
-                
+
                 Spacer()
-                
+
                 Text("Finish Signing Up")
                     .font(.title)
                     .fontWeight(.bold)
@@ -38,69 +37,67 @@ struct SignupFinishView: View {
                     .font(.body)
                     .foregroundStyle(Constants.AuthPrimaryText)
                 TextField("Enter your email", text: $email)
-                    .font(.subheadline)
-                    .padding(12)
-                    .background(Constants.inputBackgroundColor)
-                    .cornerRadius(10)
-                    .padding(.horizontal, 24)
-                
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .authInputStyle()
+
                 TextField("Enter your username", text: $username)
-                    .font(.subheadline)
-                    .padding(12)
-                    .background(Constants.inputBackgroundColor)
-                    .cornerRadius(10)
-                    .padding(.horizontal, 24)
-                ZStack(alignment: .trailing){
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .authInputStyle()
+
+                HStack {
                     SecureField("Enter your Password", text: $password)
-                        .font(.subheadline)
-                        .padding(12)
-                        .background(Constants.inputBackgroundColor)
-                        .cornerRadius(10)
-                    
+                        .textContentType(.newPassword)
+
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
                             .foregroundStyle(passwordsMatch ? Constants.accentColor : .red)
-                            .padding(.horizontal)
                     }
                 }
-                .padding(.horizontal, 24)
-                
-                ZStack(alignment: .trailing){
+                .authInputStyle()
+
+                HStack {
                     SecureField("Confirm your password", text: $confirmedPassword)
-                        .font(.subheadline)
-                        .padding(12)
-                        .background(Constants.inputBackgroundColor)
-                        .cornerRadius(10)
-                    
+                        .textContentType(.newPassword)
+
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
                             .foregroundStyle(passwordsMatch ? Constants.accentColor : .red)
-                            .padding(.horizontal)
                     }
                 }
-                .padding(.horizontal, 24)
-                .onChange(of: confirmedPassword){ oldValue, newValue in
-                    passwordsMatch = newValue == password
-                }
-            
+                .authInputStyle()
+
                 Button{
                     signUp()
                 } label: {
-                    Text("Sign Up")
-                        .frame(width: 360, height: 48)
-                        .font(.headline)
-                        .background(Constants.buttonBackgroundColor)
-                        .foregroundStyle(Constants.buttonForegroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    Group {
+                        if authManager.isAuthenticating {
+                            ProgressView()
+                        } else {
+                            Text("Sign Up")
+                        }
+                    }
+                    .authPrimaryButtonStyle()
                 }
+                .disabled(authManager.isAuthenticating)
                 .padding(.vertical)
-                
+
+                authenticationFeedback
+
                 Spacer()
-                
-                Button { dismiss() } label: {
+
+                NavigationLink{
+                    LoginView()
+                        .navigationBarBackButtonHidden()
+                } label: {
                     HStack(spacing: 3){
                         Text("Already have an account?")
                             .foregroundStyle(Constants.AuthPrimaryText)
+
                         Text("Login")
                             .fontWeight(.semibold)
                             .foregroundStyle(Constants.AuthPrimaryText)
@@ -108,13 +105,44 @@ struct SignupFinishView: View {
                 }
             }
         }
+        .onChange(of: email) { _, _ in authManager.clearAuthenticationFeedback() }
+        .onChange(of: username) { _, _ in authManager.clearAuthenticationFeedback() }
+        .onChange(of: password) { _, _ in authManager.clearAuthenticationFeedback() }
+        .onChange(of: confirmedPassword) { _, _ in authManager.clearAuthenticationFeedback() }
     }
 }
 
 private extension SignupFinishView{
+    var passwordsMatch: Bool {
+        password == confirmedPassword
+    }
+
+    @ViewBuilder
+    var authenticationFeedback: some View {
+        if let message = authManager.authenticationError {
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+                .accessibilityLabel("Sign up error: \(message)")
+        } else if let message = authManager.authenticationNotice {
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(Constants.AuthPrimaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+        }
+    }
+
     func signUp(){
         Task {
-            await authManager.signUp(withEmail: email, password: password, username: username)
+            await authManager.signUp(
+                withEmail: email,
+                password: password,
+                confirmedPassword: confirmedPassword,
+                username: username
+            )
         }
     }
 }

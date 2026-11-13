@@ -59,12 +59,12 @@ struct HomeView: View {
                     
                     //focus session card
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Start a focus Session")
+                        Text("Start a Focus Session")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundStyle(Constants.textOnYellowColor)
 
-                        Text("Send a session request to a friend or family member. Add an optional todo list or note to help you stay focused.")
+                        Text("Send a session request to a friend. Add an optional todo list or note to help you stay focused.")
                             .font(.body)
                             .foregroundStyle(Constants.textOnYellowColor)
                             .lineLimit(3)

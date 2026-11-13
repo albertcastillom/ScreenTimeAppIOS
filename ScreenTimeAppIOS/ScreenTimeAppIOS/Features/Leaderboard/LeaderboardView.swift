@@ -153,7 +153,7 @@ struct LeaderboardView: View {
                 ? Constants.buttonForegroundColor
                 : Constants.primaryTextColor
         )
-        .clipShape(RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .disabled(viewModel.isLoading)
     }
 
@@ -205,7 +205,7 @@ struct LeaderboardView: View {
             .padding(.horizontal, 12)
             .background(Constants.cardButtonBackgroundColor)
             .foregroundStyle(Constants.cardButtonForegroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
     }

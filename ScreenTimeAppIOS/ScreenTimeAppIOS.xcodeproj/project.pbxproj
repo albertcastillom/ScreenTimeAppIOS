@@ -64,6 +64,13 @@
 			);
 			target = A9601B77301C2E56002238E9 /* ScreenTimeMonitor */;
 		};
+		A9636B0730A69FCB00C498AD /* Exceptions for "ScreenTimeAppIOS" folder in "ScreenTimeAppIOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A92ECF4C30096A0300017CEE /* ScreenTimeAppIOS */;
+		};
 		A9D833523082F13D00917CAD /* Exceptions for "ScreenTimeShieldConfiguration" folder in "ScreenTimeShieldConfiguration" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -76,6 +83,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A92ECF4F30096A0300017CEE /* ScreenTimeAppIOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A9636B0730A69FCB00C498AD /* Exceptions for "ScreenTimeAppIOS" folder in "ScreenTimeAppIOS" target */,
+			);
 			path = ScreenTimeAppIOS;
 			sourceTree = "<group>";
 		};
@@ -471,6 +481,7 @@
 				DEVELOPMENT_TEAM = W4R225M7E2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenTimeAppIOS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -505,6 +516,7 @@
 				DEVELOPMENT_TEAM = W4R225M7E2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenTimeAppIOS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

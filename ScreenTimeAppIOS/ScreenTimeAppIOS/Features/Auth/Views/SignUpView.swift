@@ -33,23 +33,29 @@ struct SignUpView: View {
                     .font(.body)
                     .foregroundStyle(Constants.AuthPrimaryText)
                 TextField("Email Address", text: $email)
-                    .font(.subheadline)
-                    .padding(12)
-                    .background(Constants.inputBackgroundColor)
-                    .cornerRadius(10)
-                    .padding(.horizontal, 24)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .authInputStyle()
+
+                if !email.isEmpty && !isEmailValid {
+                    Text("Enter a valid email address to continue.")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 24)
+                        .accessibilityLabel("Email error: Enter a valid email address to continue.")
+                }
             
                 NavigationLink{
                     SignupFinishView(email: email)
                         .navigationBarBackButtonHidden()
                 } label: {
                     Text("Continue")
-                        .frame(width: 360, height: 48)
-                        .font(.headline)
-                        .background(Constants.buttonBackgroundColor)
-                        .foregroundStyle(Constants.buttonForegroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .authPrimaryButtonStyle()
                 }
+                .disabled(!isEmailValid)
                 .padding(.vertical)
                 
                 Spacer()
@@ -70,6 +76,14 @@ struct SignUpView: View {
                 
             }
         }
+    }
+}
+
+private extension SignUpView {
+    var isEmailValid: Bool {
+        let parts = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(separator: "@", omittingEmptySubsequences: false)
+        return parts.count == 2 && parts[0].isEmpty == false && parts[1].contains(".")
     }
 }
 
