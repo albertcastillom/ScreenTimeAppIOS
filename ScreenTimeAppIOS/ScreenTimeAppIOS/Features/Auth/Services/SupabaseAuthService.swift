@@ -46,8 +46,29 @@ struct SupabaseAuthService {
     }
 
     func getAuthState() async throws -> AuthenticationState{
-        let user = try? await client.auth.session.user
-        return user == nil ? .notAuthenticated : .authenticated
+        do{
+            _ = try await client.auth.session
+            return .authenticated
+        } catch let error as AuthError{
+            switch error.errorCode{
+            case .sessionNotFound,
+                    .sessionExpired,
+                    .refreshTokenNotFound,
+                    .refreshTokenAlreadyUsed:
+                return .notAuthenticated
+                
+            default:
+                throw error
+            }
+        }
+    }
+    
+    //exposes Supabases event stream
+    var authStateChanges: AsyncStream<(
+        event: AuthChangeEvent,
+        session: Session?
+    )>{
+        client.auth.authStateChanges
     }
 
     func requestPasswordReset(email: String) async throws {

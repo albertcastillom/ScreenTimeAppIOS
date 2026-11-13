@@ -26,6 +26,10 @@ final class AuthManager{
     var isPasswordRecoveryActive = false
     var isUpdatingPassword = false
     var shouldShowLogin = false
+    
+    //error states vars
+    private var authStateTask: Task<Void, Never>?
+    private var isLoadingAuthState = false
 
     init(service: SupabaseAuthService) {
         self.service = service
@@ -129,11 +133,42 @@ final class AuthManager{
         isDeletingAccount = false
     }
 
-    func getAuthState() async {
+    
+    func start() async{
+        startObservingAuthState()
+        await loadInitialAuthState()
+    }
+    
+    func loadInitialAuthState() async {
+        guard !isLoadingAuthState else {return}
+        
+        isLoadingAuthState = true
+        authState = .notDetermined
+        defer {isLoadingAuthState = false}
+        
         do{
-            self.authState = try await service.getAuthState()
+            authState = try await service.getAuthState()
         } catch {
-            print("DEBUG: Failed to get auth state: \(error)")
+            authState = .failed(message: "We couldn't check your session. Check your connection and try again.")
+            
+            print("DEBUG: Failed to load auth state: \(error)")
+        }
+    }
+    
+    func startObservingAuthState(){
+        guard authStateTask == nil else {return}
+        
+        authStateTask = Task{ [weak self] in
+            guard let self else {return}
+            
+            for await change in service.authStateChanges{
+                guard !Task.isCancelled else {return}
+                
+                handleAuthStateChange(
+                    event: change.event,
+                    hasSession: change.session != nil
+                )
+            }
         }
     }
 
@@ -299,6 +334,28 @@ private extension AuthManager {
             return "We couldn't send the reset email. Please try again."
         case .passwordUpdate:
             return "We couldn't update your password. Please try again."
+        }
+    }
+    
+    func handleAuthStateChange(
+        event: AuthChangeEvent,
+        hasSession: Bool
+    ){
+        switch event{
+        case .initialSession:
+            //Load Initial auth state performs the startyup check and distinguishes no session from error
+            break
+        case .passwordRecovery:
+            isPasswordRecoveryActive = true
+        
+        case .signedOut, .userDeleted:
+            isPasswordRecoveryActive = false
+            shouldShowLogin = true
+            authState = .notAuthenticated
+            
+        case .signedIn, .tokenRefreshed, .userUpdated, .mfaChallengeVerified:
+            guard !isPasswordRecoveryActive else {return}
+            authState = hasSession ? .authenticated : .notAuthenticated
         }
     }
 }

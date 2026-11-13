@@ -11,4 +11,5 @@ enum AuthenticationState{
     case notDetermined
     case authenticated
     case notAuthenticated
+    case failed(message: String)
 }

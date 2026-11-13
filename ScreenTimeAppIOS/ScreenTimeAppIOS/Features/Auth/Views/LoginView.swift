@@ -68,7 +68,7 @@ struct LoginView: View {
 
                 Button { dismiss() } label: {
                     HStack(spacing: 3){
-                        Text("Dont have an account?")
+                        Text("Don't have an account?")
                             .foregroundStyle(Constants.AuthPrimaryText)
                         Text("Sign Up")
                             .fontWeight(.semibold)

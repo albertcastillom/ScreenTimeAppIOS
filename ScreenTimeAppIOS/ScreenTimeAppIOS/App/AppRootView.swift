@@ -44,14 +44,50 @@ struct AppRootView: View {
                     .onAppear {
                         screenTimeManager.checkAuthorization()
                     }
+                    
+                case .failed(let message):
+                    startupErrorView(message)
                 }
             }
         }
         .task {
-            await authManager.getAuthState()
+            await authManager.start()
+        }
+    }
+    
+    private func startupErrorView(_ message: String) -> some View {
+        
+        ZStack {
+            Constants.authSurfaceColor.ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Image(systemName: "wifi.exclamationmark")
+                    .font(.system(size: 44, weight: .semibold))
+                    .foregroundStyle(Constants.AuthPrimaryText)
+
+                Text("Unable to Check Your Session")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Constants.AuthPrimaryText)
+
+                Text(message)
+                    .foregroundStyle(Constants.AuthPrimaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+
+                Button {
+                    Task {
+                        await authManager.loadInitialAuthState()
+                    }
+                } label: {
+                    Text("Try Again")
+                        .authPrimaryButtonStyle()
+                }
+            }
         }
     }
 }
+
 
 #Preview {
     AppRootView()
