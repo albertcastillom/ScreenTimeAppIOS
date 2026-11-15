@@ -9,17 +9,27 @@ import SwiftUI
 
 @main
 struct ScreenTimeAppIOSApp: App {
-    
     @State private var authManager = AuthManager(service: SupabaseAuthService())
-    
+    @State private var inviteRouter = InviteRouter()
+
     var body: some Scene {
         WindowGroup {
             AppRootView()
                 .environment(authManager)
-                .onOpenURL{ url in
-                    Task{
-                        await authManager.handleAuthCallback(url)
+                .environment(inviteRouter)
+                .onOpenURL { url in
+                    if !inviteRouter.handle(url) {
+                        Task {
+                            await authManager.handleAuthCallback(url)
+                        }
                     }
+                }
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    guard let url = activity.webpageURL else {
+                        return
+                    }
+
+                    inviteRouter.handle(url)
                 }
         }
     }
