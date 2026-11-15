@@ -13,7 +13,7 @@ struct AppConstants{
     static let projectAPIKey = "sb_publishable_re-oMhv9pfQpA3VcUadCFw_9QyBpCsP"
     
     static let inviteBaseURL = URL(
-            string: "https://join.yourdomain.com"
+            string: "https://commit-invite-site.vercel.app"
         )!
    
 }

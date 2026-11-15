@@ -5,7 +5,7 @@ This is a zero-dependency static site for ScreenTime friend invitation links.
 An invite URL has this shape:
 
 ```text
-https://YOUR-PROJECT.vercel.app/invite/PROFILE_UUID
+https://commit-invite-site.vercel.app/invite/PROFILE_UUID
 ```
 
 ## Before deploying
@@ -31,14 +31,14 @@ When an App Store or TestFlight link is available, replace `REPLACE_ME` in
 5. Leave the Build Command and Output Directory empty.
 6. Select **Deploy**.
 
-Vercel will provide a production URL similar to:
+The production URL for this project is:
 
 ```text
-https://screentime-invite.vercel.app
+https://commit-invite-site.vercel.app
 ```
 
-Use that exact hostname in the iOS Associated Domains entitlement and in
-`AppConstants.inviteBaseURL`.
+The iOS Associated Domains entitlement and `AppConstants.inviteBaseURL` must
+both use that exact hostname.
 
 ## Deploy with the Vercel CLI
 
@@ -56,13 +56,13 @@ Follow the prompts and accept the current directory as the project root.
 Check that the Apple association file returns JSON without redirecting:
 
 ```sh
-curl -i https://YOUR-PROJECT.vercel.app/.well-known/apple-app-site-association
+curl -i https://commit-invite-site.vercel.app/.well-known/apple-app-site-association
 ```
 
 Then open a test invitation containing a real profile UUID:
 
 ```text
-https://YOUR-PROJECT.vercel.app/invite/00000000-0000-4000-8000-000000000000
+https://commit-invite-site.vercel.app/invite/00000000-0000-4000-8000-000000000000
 ```
 
 Universal Links can take time to refresh because Apple retrieves the association

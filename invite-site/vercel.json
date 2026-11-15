@@ -19,8 +19,8 @@
   ],
   "rewrites": [
     {
-      "source": "/invite/:id",
-      "destination": "/index.html"
+      "source": "/invite/:path*",
+      "destination": "/"
     }
   ]
 }
