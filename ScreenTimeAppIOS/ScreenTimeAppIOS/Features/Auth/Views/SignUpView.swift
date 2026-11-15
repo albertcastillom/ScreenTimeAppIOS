@@ -11,6 +11,9 @@ struct SignUpView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var email = ""
+    //focused state vars and accesibility
+    @State private var showSignupFinish = false
+    @FocusState private var isEmailFocused: Bool
     
     var body: some View {
         ZStack {
@@ -37,6 +40,10 @@ struct SignUpView: View {
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .focused($isEmailFocused)
+                    .submitLabel(.next)
+                    .onSubmit(continueToSignup)
+                    .accessibilityLabel("Email address")
                     .authInputStyle()
 
                 if !email.isEmpty && !isEmailValid {
@@ -48,10 +55,7 @@ struct SignUpView: View {
                         .accessibilityLabel("Email error: Enter a valid email address to continue.")
                 }
             
-                NavigationLink{
-                    SignupFinishView(email: email)
-                        .navigationBarBackButtonHidden()
-                } label: {
+                Button(action: continueToSignup) {
                     Text("Continue")
                         .authPrimaryButtonStyle()
                 }
@@ -76,6 +80,10 @@ struct SignUpView: View {
                 
             }
         }
+        .navigationDestination(isPresented: $showSignupFinish){
+            SignupFinishView(email: email)
+                .navigationBarBackButtonHidden()
+        }
     }
 }
 
@@ -84,6 +92,16 @@ private extension SignUpView {
         let parts = email.trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: "@", omittingEmptySubsequences: false)
         return parts.count == 2 && parts[0].isEmpty == false && parts[1].contains(".")
+    }
+    
+    func continueToSignup(){
+        guard isEmailValid else{
+            isEmailFocused = true
+            return
+        }
+        
+        isEmailFocused = false
+        showSignupFinish = true
     }
 }
 

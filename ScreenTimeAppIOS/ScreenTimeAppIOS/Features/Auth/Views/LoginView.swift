@@ -7,12 +7,20 @@
 
 import SwiftUI
 
+//foucs navigation enums
+private enum Field: Hashable{
+    case email
+    case password
+}
+
+
 struct LoginView: View {
 
     @Environment(AuthManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
     @State private var email: String = ""
     @State private var password: String = ""
+    @FocusState private var focusedField: Field?
 
     var body: some View {
         ZStack {
@@ -35,10 +43,20 @@ struct LoginView: View {
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .password
+                    }
+                    .accessibilityLabel("Email address")
                     .authInputStyle()
 
                 SecureField("Enter your password", text: $password)
                     .textContentType(.password)
+                    .focused($focusedField, equals: .password)
+                    .submitLabel(.done)
+                    .onSubmit(login)
+                    .accessibilityLabel("Password")
                     .authInputStyle()
 
                 Button{
@@ -102,6 +120,18 @@ private extension LoginView{
     }
 
     func login(){
+        if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty{
+            focusedField = .email
+            return
+        }
+        
+        if password.isEmpty{
+            focusedField = .password
+            return
+        }
+        //reset after loggin in
+        focusedField = nil
+        
         Task {
             await authManager.login(withEmail: email, password: password)
         }

@@ -14,6 +14,7 @@ final class FriendsViewModel {
     // MARK: - View State
 
     var friends: [Profile] = []
+    var currentProfile: Profile?
     var pendingRequests: [Friendship] = []
     var pendingRequestProfilesByID: [UUID: Profile] = [:]
     var searchResults: [Profile] = []
@@ -51,9 +52,12 @@ final class FriendsViewModel {
         do {
             async let friends = service.getFriends()
             async let pendingRequests = service.getPendingFriendRequests()
+            async let currentProfile = service.getCurrentProfile()
 
             self.friends = try await friends
             self.pendingRequests = try await pendingRequests
+            self.currentProfile = try await currentProfile
+            
             self.pendingRequestProfilesByID = try await loadProfilesByID(
                 self.pendingRequests.map(\.requesterID)
             )
@@ -62,6 +66,19 @@ final class FriendsViewModel {
         }
 
         isLoading = false
+    }
+    
+    //invite url construction
+    var inviteURL: URL? {
+        guard let currentProfile else {
+            return nil
+        }
+
+        return AppConstants.inviteBaseURL
+            .appendingPathComponent("invite")
+            .appendingPathComponent(
+                currentProfile.id.uuidString.lowercased()
+            )
     }
 
     // MARK: - Search

@@ -1,0 +1,294 @@
+:root {
+  color-scheme: light;
+  --ink: #1c1c1a;
+  --muted: #656861;
+  --paper: #f8f6ee;
+  --yellow: #ffe25a;
+  --yellow-soft: #fff2a8;
+  --line: rgba(28, 28, 26, 0.16);
+  --shadow: 0 28px 80px rgba(53, 45, 8, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--paper);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  font-family:
+    ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 226, 90, 0.7), transparent 26rem),
+    radial-gradient(circle at 92% 90%, rgba(255, 226, 90, 0.36), transparent 25rem),
+    var(--paper);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  opacity: 0.36;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.page-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 56px 22px 28px;
+}
+
+.invite-card {
+  position: relative;
+  width: min(720px, 100%);
+  overflow: hidden;
+  padding: clamp(28px, 7vw, 64px);
+  border: 1px solid rgba(28, 28, 26, 0.1);
+  border-radius: 32px;
+  background: var(--yellow);
+  box-shadow: var(--shadow);
+}
+
+.invite-card::after {
+  position: absolute;
+  top: -104px;
+  right: -94px;
+  width: 270px;
+  height: 270px;
+  border: 46px solid rgba(28, 28, 26, 0.08);
+  border-radius: 50%;
+  content: "";
+}
+
+.brand-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(54px, 10vw, 92px);
+}
+
+.brand-mark {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+
+.brand-mark::before,
+.brand-mark__hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--ink);
+  content: "";
+  transform: translate(-50%, -100%);
+  transform-origin: bottom;
+}
+
+.brand-mark__hand {
+  height: 10px;
+  transform: translate(-50%, -100%) rotate(120deg);
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+h1 {
+  max-width: 600px;
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-weight: 850;
+  line-height: 0.92;
+  letter-spacing: -0.07em;
+}
+
+.intro {
+  max-width: 540px;
+  margin: 28px 0 0;
+  color: rgba(28, 28, 26, 0.76);
+  font-size: clamp(1rem, 2.5vw, 1.22rem);
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 22px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:focus-visible {
+  outline: 4px solid white;
+  outline-offset: 3px;
+}
+
+.button--primary {
+  color: var(--yellow);
+  background: var(--ink);
+  box-shadow: 0 10px 24px rgba(28, 28, 26, 0.18);
+}
+
+.button--secondary {
+  background: transparent;
+}
+
+.install-note,
+.status-box {
+  margin-top: 22px;
+}
+
+.install-note {
+  max-width: 520px;
+  color: rgba(28, 28, 26, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.status-box {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid rgba(28, 28, 26, 0.22);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.38);
+  line-height: 1.45;
+}
+
+.status-box span {
+  color: rgba(28, 28, 26, 0.7);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: clamp(54px, 9vw, 82px);
+  padding-top: 22px;
+  border-top: 1px solid rgba(28, 28, 26, 0.2);
+}
+
+.steps > div {
+  display: grid;
+  gap: 10px;
+}
+
+.steps p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.step-number {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .page-shell {
+    align-content: start;
+    padding: 18px 14px 24px;
+  }
+
+  .invite-card {
+    padding: 26px 22px 28px;
+    border-radius: 24px;
+  }
+
+  .brand-row {
+    margin-bottom: 58px;
+  }
+
+  h1 {
+    font-size: clamp(3.25rem, 17vw, 5rem);
+  }
+
+  .actions,
+  .button {
+    width: 100%;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .steps > div {
+    grid-template-columns: 34px 1fr;
+    align-items: baseline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

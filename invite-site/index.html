@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffe25a" />
+    <meta
+      name="description"
+      content="Open a ScreenTime friend invitation and focus together."
+    />
+    <title>ScreenTime Friend Invite</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="invite-card" aria-labelledby="invite-title">
+        <div class="brand-row">
+          <div class="brand-mark" aria-hidden="true">
+            <span class="brand-mark__hand"></span>
+          </div>
+          <span class="brand-name">ScreenTime</span>
+        </div>
+
+        <div class="eyebrow">FRIEND INVITATION</div>
+
+        <h1 id="invite-title">Focus is better together.</h1>
+        <p id="invite-message" class="intro">
+          Open this invitation on your iPhone to connect with your friend and
+          help each other stay focused.
+        </p>
+
+        <div id="invite-actions" class="actions" hidden>
+          <a id="open-app-link" class="button button--primary" href="#">
+            Open ScreenTime
+            <span aria-hidden="true">&#8599;</span>
+          </a>
+          <a
+            id="install-app-link"
+            class="button button--secondary"
+            href="#"
+            rel="noreferrer"
+          >
+            Get the app
+          </a>
+        </div>
+
+        <p id="install-note" class="install-note" hidden>
+          The public install link is coming soon. If you already have the app,
+          tap <strong>Open ScreenTime</strong>.
+        </p>
+
+        <div id="invalid-invite" class="status-box" role="status" hidden>
+          <strong>This invite link isn&rsquo;t valid.</strong>
+          <span>Ask your friend to share a new link from the Friends page.</span>
+        </div>
+
+        <div class="steps" aria-label="How friend invites work">
+          <div>
+            <span class="step-number">01</span>
+            <p>Open the invitation in the app.</p>
+          </div>
+          <div>
+            <span class="step-number">02</span>
+            <p>Confirm the friend request.</p>
+          </div>
+          <div>
+            <span class="step-number">03</span>
+            <p>Start focusing together.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span>Built for focused friendships.</span>
+        <span aria-hidden="true">&bull;</span>
+        <span>No invite data is stored on this page.</span>
+      </footer>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

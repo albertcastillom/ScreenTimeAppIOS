@@ -12,6 +12,7 @@ struct FriendsView: View {
     @State private var searchText = ""
     @State private var isShowingSearch = false
 
+
     var body: some View {
        ZStack {
            Constants.appBackgroundColor
@@ -61,6 +62,27 @@ struct FriendsView: View {
                        .foregroundStyle(Constants.buttonForegroundColor)
                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                        .padding(.horizontal)
+               }
+               
+               //Share to Friends Link
+               if let inviteURL = viewModel.inviteURL {
+                   ShareLink(
+                       item: inviteURL,
+                       subject: Text("Join me on ScreenTime"),
+                       message: Text("Tap this link to add me as a friend.")
+                   ) {
+                       Label("Invite a Friend", systemImage: "square.and.arrow.up")
+                           .frame(maxWidth: .infinity, minHeight: 48)
+                           .background(Constants.buttonBackgroundColor)
+                           .foregroundStyle(Constants.buttonForegroundColor)
+                           .clipShape(
+                               RoundedRectangle(
+                                   cornerRadius: 16,
+                                   style: .continuous
+                               )
+                           )
+                   }
+                   .padding(.horizontal)
                }
                
                Spacer()

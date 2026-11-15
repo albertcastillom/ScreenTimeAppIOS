@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+private enum Field: Hashable {
+    case email
+    case username
+    case password
+    case confirmedPassword
+}
+
 struct SignupFinishView: View {
 
     @Environment(AuthManager.self) private var authManager
@@ -16,6 +23,7 @@ struct SignupFinishView: View {
     @State private var username = ""
     @State private var password = ""
     @State private var confirmedPassword = ""
+    @FocusState private var focusedField: Field?
 
     init(email: String) {
         _email = State(initialValue: email)
@@ -41,17 +49,35 @@ struct SignupFinishView: View {
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .username
+                    }
+                    .accessibilityLabel("Email address")
                     .authInputStyle()
 
                 TextField("Enter your username", text: $username)
                     .textContentType(.username)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .focused($focusedField, equals: .username)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .password
+                    }
+                    .accessibilityLabel("Username")
                     .authInputStyle()
 
                 HStack {
                     SecureField("Enter your Password", text: $password)
                         .textContentType(.newPassword)
+                        .focused($focusedField, equals: .password)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .confirmedPassword
+                        }
+                        .accessibilityLabel("New password")
 
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
@@ -63,6 +89,10 @@ struct SignupFinishView: View {
                 HStack {
                     SecureField("Confirm your password", text: $confirmedPassword)
                         .textContentType(.newPassword)
+                        .focused($focusedField, equals: .confirmedPassword)
+                        .submitLabel(.done)
+                        .onSubmit(signUp)
+                        .accessibilityLabel("Confirm new password")
 
                     if !password.isEmpty && !confirmedPassword.isEmpty {
                         Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
@@ -136,6 +166,7 @@ private extension SignupFinishView{
     }
 
     func signUp(){
+        focusedField = nil
         Task {
             await authManager.signUp(
                 withEmail: email,

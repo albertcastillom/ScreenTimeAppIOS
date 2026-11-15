@@ -5,9 +5,14 @@
 
 import SwiftUI
 
+private enum Field: Hashable {
+    case email
+}
+
 struct ForgotPasswordView: View {
     @Environment(AuthManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedField: Field?
 
     @State private var email = ""
 
@@ -40,6 +45,7 @@ struct ForgotPasswordView: View {
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .focused($focusedField, equals: .email)
                         .submitLabel(.send)
                         .authInputStyle()
                         .onSubmit(sendResetLink)
@@ -100,6 +106,7 @@ private extension ForgotPasswordView {
     }
 
     func sendResetLink() {
+        focusedField = nil
         Task {
             await authManager.requestPasswordReset(email: email)
         }

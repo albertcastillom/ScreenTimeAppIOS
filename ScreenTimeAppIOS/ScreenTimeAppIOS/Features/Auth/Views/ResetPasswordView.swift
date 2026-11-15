@@ -5,11 +5,17 @@
 
 import SwiftUI
 
+private enum Field: Hashable {
+    case password
+    case confirmedPassword
+}
+
 struct ResetPasswordView: View {
     @Environment(AuthManager.self) private var authManager
 
     @State private var password = ""
     @State private var confirmedPassword = ""
+    @FocusState private var focusedField: Field?
 
     private var passwordsMatch: Bool {
         password == confirmedPassword
@@ -41,13 +47,21 @@ struct ResetPasswordView: View {
 
                     passwordField(
                         title: "New Password",
-                        text: $password
-                    )
+                        text: $password,
+                        field: .password,
+                        submitLabel: .next
+                    ){
+                        focusedField = .confirmedPassword
+                    }
 
                     passwordField(
                         title: "Confirm New Password",
-                        text: $confirmedPassword
-                    )
+                        text: $confirmedPassword,
+                        field: .confirmedPassword,
+                        submitLabel: .done
+                    ){
+                        updatePassword()
+                    }
 
                     Button(action: updatePassword) {
                         Group {
@@ -86,11 +100,14 @@ struct ResetPasswordView: View {
 }
 
 private extension ResetPasswordView {
-    func passwordField(title: String, text: Binding<String>) -> some View {
+    func passwordField(title: String, text: Binding<String>, field: Field, submitLabel: SubmitLabel, onSubmit: @escaping () -> Void) -> some View {
         HStack {
             SecureField(title, text: text)
                 .textContentType(.newPassword)
-                .submitLabel(title == "New Password" ? .next : .done)
+                .focused($focusedField, equals: field)
+                .submitLabel(submitLabel)
+                .onSubmit(onSubmit)
+                .accessibilityLabel(title)
 
             if !password.isEmpty && !confirmedPassword.isEmpty {
                 Image(systemName: passwordsMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
@@ -102,6 +119,8 @@ private extension ResetPasswordView {
     }
 
     func updatePassword() {
+        focusedField = nil
+        
         Task {
             await authManager.updatePassword(
                 password,

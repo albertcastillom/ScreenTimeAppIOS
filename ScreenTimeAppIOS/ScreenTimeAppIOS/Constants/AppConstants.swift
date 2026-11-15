@@ -11,5 +11,9 @@ struct AppConstants{
     
     static let projectURLString = "https://mbcebxzjsodtcntixcii.supabase.co"
     static let projectAPIKey = "sb_publishable_re-oMhv9pfQpA3VcUadCFw_9QyBpCsP"
+    
+    static let inviteBaseURL = URL(
+            string: "https://join.yourdomain.com"
+        )!
    
 }
