@@ -8,10 +8,21 @@
 import SwiftUI
 
 struct FriendsView: View {
-    @State private var viewModel = FriendsViewModel()
+    @State private var viewModel: FriendsViewModel
     @State private var searchText = ""
     @State private var isShowingSearch = false
 
+    private let loadsData: Bool
+
+    init() {
+        _viewModel = State(initialValue: FriendsViewModel())
+        loadsData = true
+    }
+
+    init(viewModel: FriendsViewModel, loadsData: Bool) {
+        _viewModel = State(initialValue: viewModel)
+        self.loadsData = loadsData
+    }
 
     var body: some View {
        ZStack {
@@ -89,6 +100,10 @@ struct FriendsView: View {
            }
         }
        .task {
+           guard loadsData else {
+               return
+           }
+
            await viewModel.loadFriendsScreen()
        }
     }
@@ -128,8 +143,13 @@ struct FriendsView: View {
                 Text("No friends yet")
                     .foregroundStyle(Constants.textOnYellowColor)
             } else {
-                ForEach(viewModel.friends) { friend in
+                
+                ForEach(Array(viewModel.friends.enumerated()), id: \.element.id){ index, friend in
                     friendRow(friend)
+                    if index < viewModel.friends.count - 1{
+                        Divider()
+                            .overlay(Constants.textOnYellowColor.opacity(0.25))
+                    }
                 }
             }
         }
@@ -234,5 +254,47 @@ struct FriendsView: View {
 }
 
 #Preview {
-    FriendsView()
+    let viewModel = FriendsViewModel()
+
+    viewModel.currentProfile = Profile(
+        id: UUID(),
+        username: "albert",
+        createdAt: Date(),
+        showOnGlobalLeaderboard: true
+    )
+    viewModel.friends = [
+        Profile(
+            id: UUID(),
+            username: "jessica",
+            createdAt: Date(),
+            showOnGlobalLeaderboard: true
+        ),
+        Profile(
+            id: UUID(),
+            username: "Chloe",
+            createdAt: Date(),
+            showOnGlobalLeaderboard: false
+        ),
+        Profile(
+            id: UUID(),
+            username: "Kim",
+            createdAt: Date(),
+            showOnGlobalLeaderboard: true
+        ),Profile(
+            id: UUID(),
+            username: "Javier",
+            createdAt: Date(),
+            showOnGlobalLeaderboard: true
+        ),Profile(
+            id: UUID(),
+            username: "Bryan",
+            createdAt: Date(),
+            showOnGlobalLeaderboard: true
+        ),
+    ]
+
+    return FriendsView(
+        viewModel: viewModel,
+        loadsData: false
+    )
 }
