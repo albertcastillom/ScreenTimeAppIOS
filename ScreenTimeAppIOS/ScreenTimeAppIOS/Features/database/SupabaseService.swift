@@ -256,7 +256,8 @@ struct SupabaseService {
             .execute()
             .value
     }
-
+    
+    //incoming requests
     func getPendingFriendRequests() async throws -> [Friendship] {
         let userID = try await currentUserID()
 
@@ -264,6 +265,19 @@ struct SupabaseService {
             .from("friendships")
             .select()
             .eq("addressee_id", value: userID.uuidString)
+            .eq("status", value: FriendshipStatus.pending.rawValue)
+            .execute()
+            .value
+    }
+    
+    //requests you sent out
+    func getOutgoingPendingFriendRequests() async throws -> [Friendship]{
+        let userId = try await currentUserID()
+        
+        return try await client
+            .from("friendships")
+            .select()
+            .eq("requester_id", value: userId.uuidString)
             .eq("status", value: FriendshipStatus.pending.rawValue)
             .execute()
             .value

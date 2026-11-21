@@ -130,16 +130,49 @@ struct AddFriendView: View {
 
             Spacer()
 
-            Button("Add") {
-                Task {
-                    await viewModel.sendFriendRequest(to: profile)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Constants.cardButtonBackgroundColor)
-            .accessibilityLabel("Add \(profile.username)")
+            resultAction(for: profile)
         }
         .padding(.vertical, 4)
+    }
+    
+    //result row helpers
+    @ViewBuilder
+    private func resultAction(for profile: Profile)-> some View{
+        switch viewModel.searchResultState(for: profile) {
+        case .me:
+            statusLabel("Me", systemImage: "person.fill")
+        case .added:
+            statusLabel(
+                        "Added",
+                        systemImage: "checkmark"
+                    )
+        case .requested:
+            statusLabel(
+                       "Requested",
+                       systemImage: "clock"
+                   )
+        case .incomingRequest:
+            statusLabel(
+                       "Pending",
+                       systemImage: "person.badge.clock"
+                   )
+        case .available:
+            Button("Add") {
+                        Task {
+                            await viewModel.sendFriendRequest(to: profile)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Constants.cardButtonBackgroundColor)
+                    .accessibilityLabel("Add \(profile.username)")
+                        
+        }
+    }
+    
+    private func statusLabel(_ title: String, systemImage: String) -> some View{
+        Label(title, systemImage: systemImage)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Constants.textOnYellowColor.opacity(0.7))
     }
 
     private func search() {
